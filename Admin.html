@@ -54,7 +54,7 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#0f172a}
       <strong>íŒŒì¼ëª… ê·œì¹™</strong><br>
       ë°ì¼ë¦¬: <code>freight_YYYYMMDD.html</code><br>
       ì˜ˆ: <code>freight_20260928.html</code><br>
-      <span class="warn">ëŒ€ì‹œë³´ë“œ í™”ë©´Â·ì°¨íŠ¸Â·ì¸ì‡„ ì„¤ì •ì„ ììœ ë¡­ê²Œ ë³€ê²½í•  ìˆ˜ ìˆìŠµë‹ˆë‹¤. ì—…ë¡œë“œí•œ ì›ë³¸ HTMLì€ ì„ì˜ë¡” ê°€ê³µí•˜ì§€ ì•Šê³  ê·¸ëŒ€ë¡” ë³´ì¡´í•©ë‹ˆë‹¤.</span>
+      <span class="warn">ëŒ€ì‹œë³´ë“œ í™”ë©´Â·ì°¨íŠ¸Â·ì¸ì‡„ ì„¤ì •ì„ ììœ ë¡­ê²Œ ë³€ê²½í•  ìˆ˜ ìˆìŠµë‹ˆë‹¤. ì—…ë¡œë“œí•œ ì›ë³¸ HTMLì€ ì„ì˜ë¡œ ê°€ê³µí•˜ì§€ ì•Šê³  ê·¸ëŒ€ë¡œ ë³´ì¡´í•©ë‹ˆë‹¤.</span>
     </div>
 
     <label class="upload" id="dropZone">
@@ -142,10 +142,10 @@ function classifyName(name){
 function showMeta(meta,format){
   const badge='<span class="badge daily">ë°ì¼ë¦¬ ë¦¬í¬íŠ¸</span>';
   document.getElementById('fileMeta').innerHTML=
-    '<div class="k">ìœ í˜•</div><div class="v">'+badge+'</div>'+ 
-    '<div class="k">ê¸°ì¤€ì¼</div><div class="v">'+esc(meta.date)+'</div>'+ 
-    '<div class="k">ì œëª‰</div><div class="v">'+esc(meta.title)+'</div>'+ 
-    '<div class="k">HTML í˜•ì‹</div><div class="v">'+esc(format)+'</div>'+ 
+    '<div class="k">ìœ í˜•</div><div class="v">'+badge+'</div>'+
+    '<div class="k">ê¸°ì¤€ì¼</div><div class="v">'+esc(meta.date)+'</div>'+
+    '<div class="k">ì œëª©</div><div class="v">'+esc(meta.title)+'</div>'+
+    '<div class="k">HTML í˜•ì‹</div><div class="v">'+esc(format)+'</div>'+
     '<div class="k">íŒŒì¼ëª… ê·œì¹™</div><div class="v good">âœ“ ì •ìƒ</div>';
   document.getElementById('fileMeta').style.display='grid';
 }
@@ -182,39 +182,72 @@ function loadFile(file){
     }
 
     const hasRaw=/<script\b(?=[^>]*\bid\s*=\s*["']rawData["'])/i.test(html);
-    const hasCmt=/<script\b(?=[^>]*\bid\s*=\s*[\"']cmtData[\"'])/i.test(html);
-    const format=(hasRaw?'rawData ê°ì§€':'rawData ë¯¸ê°ì§€')+' Â· '+
-\ĞÛ]ÉØÛ]]H:¬$;)à	Î‰ØÛ]]H:ëî:¬$;)à	ÊJÉÈ0­È:ãázé¯{f%HS;&ä:ìî;( ;'©IÎÂ‚ˆÙ[XİYš[OYš[NÜÙ[XİY[Z[ÜÙ[XİYY]O[Y]NÂˆÚİÓY]JY]K›Ü›X]
-NÂˆØİ[Y[™Ù][[Y[RY
-	Ùš[Tİ]\ÉÊKš[›™\’SIÏÜ[ˆÛ\ÜÏH™ÛÛÙ¸§$È;'n;"çH;&a:èã0­È;( ;'©H;) :îa;&a:èãÜÜ[‰ÎÂˆ™Yœ™\Ú]ÛœÊ
-NÂˆNÂˆ™XY\‹›Û™\œ›ÜJ
-OO˜ÛX\”Ù[Xİ[ÛŠ	ûc#;'o;'a;'o{)à:ê®ûe¢;"­zââ:âé‰ÊNÂˆ™XY\‹œ™XY\Õ^
-š[K	ÕU‹N	ÊNÂŸB‚™[˜İ[Ûˆ™Yœ™\Ú]ÛœÊ
-^ÂˆÛÛœİš[SÚÏHH\Ù[XİYš[I‰ˆH\Ù[XİY[	‰ˆH\Ù[XİYY]NÂˆØİ[Y[™Ù][[Y[RY
-	Ü™]šY]Ğ‰ÊK™\ØX›YHYš[SÚÎÂˆØİ[Y[™Ù][[Y[RY
-	ÜØ]™P‰ÊK™\ØX›YHJš[SÚÉ‰˜YZ[•™\šYšYY
-NÂŸB‚™[˜İ[Ûˆ™]šY]Ñš[J
-^ÂˆYŠ\Ù[XİY[
-\™]\›ÂˆØİ[Y[™Ù][[Y[RY
-	Ü™]šY]ĞØ\™	ÊKœİ[K™\Ü^OIÉÎÂˆØİ[Y[™Ù][[Y[RY
-	Ü™]šY]Ñœ˜[YIÊKœÜ˜ÙØÏ\Ù[XİY[ÂˆØİ[Y[™Ù][[Y[RY
-	Ü™]šY]ĞØ\™	ÊKœØÜ›Û[ÕšY]ÊØ™Z]š[Ü‰ÜÛ[Ûİ	Ë›ØÚÎ‰Üİ\	ßJNÂŸB‚™[˜İ[ÛˆØ]™Qš[J
-^ÂˆYŠ\Ù[XİYš[_\Ù[XİY[\Ù[XİYY]J\™]\›ÂˆYŠXYZ[•™\šYšYY
-^Ø[\
-	ú­ :é«;'¤;'n;)§{'a:ê/;( ;&a:èã;em;(ï;!.;&¥‰ÊNÜ™]\›ßB‚ˆÛÛœİYØİ[Y[™Ù][[Y[RY
-	ÜØ]™P‰ÊNÂˆ‹™\ØX›Y]YNØ‹^ÛÛ[IÑÛÛÙÛHÚY];( ;'©H;)$K‹‹‰ÎÂ‚ˆÛÛÙÛKœØÜš\œ[‚ˆÚ]İXØÙ\ÜÒ[™\ŠOÂˆ‹^ÛÛ[IÑÛÛÙÛHÚY];( ;'©IÎÜ™Yœ™\Ú]ÛœÊ
-NÂˆ]]Z[IÏİ›Û™Ï¸§$È;( ;'©H;&a:èãÜİ›Û™Ïœ‰ÊÈˆ	ú®,;) ;'oˆ	ÊÙ\ØÊ‹™]JJÉÏœ‰ÊÈˆ	û,¦:é«ˆ	ÊÊ‹›İ™\Üš][Éú®,;(m:ãæ{'o:é«;cë;b®:¬,{"è	Î‰û"è:­ç;( ;'©IÊJÉÏœ‰ÊÈˆ	û&ä:ìîSˆ	ÊÊ‹›ÜšYÚ[˜[[Ø]™YÉúìí;(m;&a:èã	Î‰û( ;'©H;fe{'n;ea;&¥	ÊJÂˆ
-‹™Ú]X”X›\ÚYÉÏœ»-g;"è:é«;cë;b®ˆ:ì&;& H;&a:èã	Î‰ÉÊNÂˆYŠ‹™Ú]X•\›
-^Âˆ]Z[
-ÏIÏœH™YH‰ÊÙ\ØĞ]Š‹™Ú]X•\›
-JÉÈˆ\™Ù]H—Ø›[šÈˆ™[H››ÛÜ[™\ˆºé«;cë;b®;%í:®,8¡¥ÏØO‰ÎÂˆBˆYŠ‹Ø\›š[™ÜÉ‰œ‹Ø\›š[™ÜË›[™İ
-^Âˆ]Z[
-ÏIÏœÜ[ˆÛ\ÜÏHØ\›ˆº¬ ;)§H;,.:¬èˆ	ÊÙ\ØÊ‹Ø\›š[™ÜËš›Ú[Š	ÈÈ	ÊJJÉÏÜÜ[‰ÎÂˆBˆØİ[Y[™Ù][[Y[RY
-	Ü™\İ[Ø\™	ÊKœİ[K™\Ü^OIÉÎÂˆØİ[Y[™Ù][[Y[RY
-	Ü™\İ[›Ş	ÊKš[›™\’SY]Z[ÂˆØİ[Y[™Ù][[Y[RY
-	Ü™\İ[Ø\™	ÊKœØÜ›Û[ÕšY]ÊØ™Z]š[Ü‰ÜÛ[Ûİ	Ë›ØÚÎ‰Üİ\	ßJNÂˆJBˆÚ]˜Z[\™R[™\Š\œOÂˆ‹^ÛÛ[IÑÛÛÙÛHÚY];( ;'©IÎÜ™Yœ™\Ú]ÛœÊ
-NÂˆ]\ÙÏY\œ‰‰™\œ‹›Y\ÜØYÙOÙ\œ‹›Y\ÜØYÙN”İš[™Ê\œŠNÂˆYŠÑÚ]XˆÚÙ[‹ÚK\İ
-\ÙÊJ[\ÙÏIúì';e¢H;!);(%{'m;&a:èã:ä&;)à;%b»%f;"­zââ:âéˆ\ÈØÜš\;!);(%{'a;fe{'n;em;(ï;!.;&¥‰ÎÂˆ[\
-\ÙÊNÂˆJBˆœØ]™R[œ›ÛPYZ[ŠÂˆYZ[”\ÜİÛÜ™œ\ÜİÛÜ™
+    const hasCmt=/<script\b(?=[^>]*\bid\s*=\s*["']cmtData["'])/i.test(html);
+    const format=(hasRaw?'rawData ê°ì§€':'rawData ë¯¸ê°ì§€')+' Â· '+(hasCmt?'cmtData ê°ì§€':'cmtData ë¯¸ê°ì§€')+' Â· ë…ë¦½í˜• HTML ì›ë³¸ ì €ì¥';
 
-Kˆš[S˜[YNœÙ[XİYš[K›˜[YKˆ[^œÙ[XİY[ˆX›\ÚÑÚ]XYBˆJNÂŸB‚™[˜İ[Ûˆ\ØÊŠ^Ü™]\›ˆİš[™ÊÏÉÉÊKœ™\XÙJÖÉˆ‰×KÙËÏOŠÉÉ‰Î‰É˜[\ÉË	Ï	Î‰É›ÉË	Ï‰Î‰É™İÉË	È‰Î‰Éœ][İÉË‰È‰ÉˆÌÎNÉßVØ×JJNßB™[˜İ[Ûˆ\ØĞ]ŠŠ^Ü™]\›ˆ\ØÊŠNßBÜØÜš\‚Ø›ÙO‚Ú[‚
+    selectedFile=file;selectedHtml=html;selectedMeta=meta;
+    showMeta(meta,format);
+    document.getElementById('fileStatus').innerHTML='<span class="good">âœ“ ì¸ì‹ ì™„ë£Œ Â· ì €ì¥ ì¤€ë¹„ ì™„ë£Œ</span>';
+    refreshButtons();
+  };
+  reader.onerror=()=>clearSelection('íŒŒì¼ì„ ì½ì§€ ëª»í–ˆìŠµë‹ˆë‹¤.');
+  reader.readAsText(file,'UTF-8');
+}
+
+function refreshButtons(){
+  const fileOk=!!selectedFile&&!!selectedHtml&&!!selectedMeta;
+  document.getElementById('previewBtn').disabled=!fileOk;
+  document.getElementById('saveBtn').disabled=!(fileOk&&adminVerified);
+}
+
+function previewFile(){
+  if(!selectedHtml)return;
+  document.getElementById('previewCard').style.display='';
+  document.getElementById('previewFrame').srcdoc=selectedHtml;
+  document.getElementById('previewCard').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function saveFile(){
+  if(!selectedFile||!selectedHtml||!selectedMeta)return;
+  if(!adminVerified){alert('ê´€ë¦¬ì ì¸ì¦ì„ ë¨¼ì € ì™„ë£Œí•´ ì£¼ì„¸ìš”.');return;}
+
+  const btn=document.getElementById('saveBtn');
+  btn.disabled=true;btn.textContent='Google Sheet ì €ì¥ ì¤‘...';
+
+  google.script.run
+    .withSuccessHandler(r=>{
+      btn.textContent='Google Sheet ì €ì¥';refreshButtons();
+      let detail='<strong>âœ“ ì €ì¥ ì™„ë£Œ</strong><br>'+
+        'ê¸°ì¤€ì¼: '+esc(r.date)+'<br>'+
+        'ì²˜ë¦¬: '+(r.overwritten?'ê¸°ì¡´ ë™ì¼ ë¦¬í¬íŠ¸ ê°±ì‹ ':'ì‹ ê·œ ì €ì¥')+'<br>'+
+        'ì›ë³¸ HTML: '+(r.originalHtmlSaved?'ë³´ì¡´ ì™„ë£Œ':'ì €ì¥ í™•ì¸ í•„ìš”')+
+        (r.githubPublished?'<br>ìµœì‹  ë¦¬í¬íŠ¸: ë°˜ì˜ ì™„ë£Œ':'');
+      if(r.githubUrl){
+        detail+='<br><a href="'+escAttr(r.githubUrl)+'" target="_blank" rel="noopener">ë¦¬í¬íŠ¸ ì—´ê¸° â†—</a>';
+      }
+      if(r.warnings&&r.warnings.length){
+        detail+='<br><span class="warn">ê²€ì¦ ì°¸ê³ : '+esc(r.warnings.join(' / '))+'</span>';
+      }
+      document.getElementById('resultCard').style.display='';
+      document.getElementById('resultBox').innerHTML=detail;
+      document.getElementById('resultCard').scrollIntoView({behavior:'smooth',block:'start'});
+    })
+    .withFailureHandler(err=>{
+      btn.textContent='Google Sheet ì €ì¥';refreshButtons();
+      let msg=err&&err.message?err.message:String(err);
+      if(/GitHub Token/i.test(msg))msg='ë°œí–‰ ì„¤ì •ì´ ì™„ë£Œë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤. Apps Script ì„¤ì •ì„ í™•ì¸í•´ ì£¼ì„¸ìš”.';
+      alert(msg);
+    })
+    .saveHtmlFromAdmin({
+      adminPassword:password(),
+      fileName:selectedFile.name,
+      htmlText:selectedHtml,
+      publishToGithub:true
+    });
+}
+
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function escAttr(v){return esc(v);}
+</script>
+</body>
+</html>
