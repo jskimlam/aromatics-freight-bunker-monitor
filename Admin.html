@@ -1,0 +1,644 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Aromatics Freight & Bunker Admin</title>
+<style>
+:root{
+  --navy:#071D49;
+  --navy2:#0B2A6B;
+  --blue:#2A78D6;
+  --cyan:#44B6E8;
+  --gold:#D2AE4B;
+  --ink:#0F172A;
+  --muted:#64748B;
+  --line:#DCE5F0;
+  --tint:#F4F7FB;
+  --tint2:#EAF2FB;
+  --good:#117A55;
+  --bad:#B42318;
+  --white:#FFFFFF;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:#EEF3F8;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic","Segoe UI",sans-serif}
+body{min-height:100vh}
+.mast{
+  background:
+    radial-gradient(circle at 78% 18%,rgba(68,182,232,.22),transparent 28%),
+    linear-gradient(135deg,var(--navy),var(--navy2) 72%,#103A83);
+  color:#fff;border-bottom:4px solid var(--gold)
+}
+.wrap{max-width:1100px;margin:0 auto;padding-left:18px;padding-right:18px}
+.mast .wrap{padding-top:26px;padding-bottom:26px}
+.eyebrow{font-size:10px;letter-spacing:.18em;font-weight:800;color:#9FC7F5}
+.brandrow{display:flex;justify-content:space-between;gap:20px;align-items:flex-end;flex-wrap:wrap}
+h1{font-size:clamp(23px,3.1vw,36px);line-height:1.15;margin:7px 0 0;font-weight:800;letter-spacing:-.035em}
+.subtitle{font-size:12px;color:#CFDDF1;margin-top:8px;line-height:1.65}
+.console{
+  min-width:180px;border-left:1px solid rgba(255,255,255,.25);padding-left:16px;
+  text-align:right
+}
+.console b{display:block;font-size:11px;color:#8ED7F7;letter-spacing:.12em}
+.console strong{display:block;font-size:15px;margin-top:3px}
+.statusbar{background:#fff;border-bottom:1px solid var(--line)}
+.statusbar .wrap{display:flex;gap:8px;flex-wrap:wrap;padding-top:9px;padding-bottom:9px}
+.pill{
+  font-size:11px;border:1px solid var(--line);border-radius:999px;padding:4px 9px;
+  background:var(--tint);color:var(--muted)
+}
+.pill.on{background:#EAF8F2;border-color:#BEE7D5;color:#0C6848}
+main.wrap{padding-top:18px;padding-bottom:44px}
+.section{
+  display:grid;grid-template-columns:52px minmax(0,1fr);gap:14px;
+  margin-bottom:15px
+}
+.step{
+  width:42px;height:42px;border-radius:12px;background:var(--navy2);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;
+  box-shadow:0 5px 14px rgba(7,29,73,.16)
+}
+.card{
+  background:#fff;border:1px solid var(--line);border-radius:14px;
+  padding:17px 18px;box-shadow:0 4px 18px rgba(15,23,42,.045)
+}
+.cardhead{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:13px}
+.card h2{font-size:15px;margin:0;font-weight:800;letter-spacing:-.015em}
+.kicker{font-size:10px;color:var(--blue);font-weight:800;letter-spacing:.12em;margin-bottom:3px}
+.small{font-size:11px;color:var(--muted);line-height:1.65}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.kv{
+  border:1px solid var(--line);background:var(--tint);border-radius:10px;padding:10px 11px;
+  font-size:10px;color:var(--muted)
+}
+.kv strong{display:block;font-size:12px;color:var(--ink);margin-top:3px;word-break:break-all}
+input[type=password],input[type=text]{
+  width:100%;border:1px solid #C8D4E3;background:#fff;border-radius:9px;
+  padding:10px 11px;font:inherit;font-size:13px;outline:none
+}
+input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(42,120,214,.10)}
+button{
+  border:0;border-radius:9px;padding:9px 13px;cursor:pointer;font:inherit;
+  font-size:12px;font-weight:800;transition:.15s ease
+}
+button:hover:not(:disabled){transform:translateY(-1px)}
+button:disabled{opacity:.42;cursor:not-allowed;transform:none}
+.primary{background:var(--navy2);color:#fff}
+.blue{background:var(--blue);color:#fff}
+.success{background:var(--good);color:#fff}
+.secondary{background:#E8EEF6;color:#334155}
+.ghost{background:#fff;color:var(--navy2);border:1px solid #C7D5E8}
+.upload{
+  display:flex;align-items:center;justify-content:center;min-height:150px;
+  border:1.5px dashed #9FB1C8;border-radius:12px;background:linear-gradient(180deg,#FAFCFE,#F4F8FC);
+  cursor:pointer;text-align:center;padding:22px;transition:.15s
+}
+.upload:hover,.upload.drag{border-color:var(--blue);background:#EEF6FF}
+.upload input{display:none}
+.uploadIcon{
+  width:44px;height:44px;border-radius:13px;margin:0 auto 10px;
+  background:linear-gradient(135deg,var(--navy2),var(--blue));color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900
+}
+.filename{font-size:14px;font-weight:800}
+.good{color:var(--good)} .bad{color:var(--bad)}
+.info{
+  margin-top:10px;padding:10px 11px;border-radius:9px;background:var(--tint);
+  border:1px solid var(--line);font-size:11px;line-height:1.65;color:#475569
+}
+.validation{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+.badge{
+  padding:3px 7px;border-radius:999px;font-size:10px;font-weight:700;
+  background:#EDF2F8;color:#52647A;border:1px solid #D7E0EB
+}
+.badge.ok{background:#E8F7F1;color:#0C6848;border-color:#BEE7D5}
+.badge.warn{background:#FFF7E6;color:#8A5A00;border-color:#F3D99B}
+.preview{
+  width:100%;height:590px;border:1px solid #C8D4E3;border-radius:10px;background:#fff
+}
+.result{
+  border-left:4px solid var(--good);background:#F0FAF6;border-radius:9px;
+  padding:12px 13px;font-size:12px;line-height:1.8
+}
+.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:10px}
+table{width:100%;border-collapse:collapse;font-size:11px;background:#fff}
+th{
+  text-align:left;background:#F4F7FB;color:#475569;padding:9px 10px;
+  border-bottom:1px solid var(--line);white-space:nowrap
+}
+td{padding:9px 10px;border-bottom:1px solid #EDF1F6;vertical-align:middle}
+tr:last-child td{border-bottom:0}
+td.num{font-variant-numeric:tabular-nums}
+.actions{display:flex;gap:5px;white-space:nowrap}
+.actions button{padding:5px 8px;font-size:10px}
+a{color:var(--blue)}
+.sep{height:1px;background:var(--line);margin:13px 0}
+@media(max-width:760px){
+  .section{grid-template-columns:1fr;gap:7px}
+  .step{width:auto;height:28px;border-radius:7px;justify-content:flex-start;padding-left:10px}
+  .grid2,.grid3{grid-template-columns:1fr}
+  .console{text-align:left;border-left:0;border-top:1px solid rgba(255,255,255,.22);padding:10px 0 0;min-width:100%}
+  .preview{height:420px}
+}
+</style>
+</head>
+<body>
+
+<header class="mast">
+  <div class="wrap">
+    <div class="eyebrow">AROMATICS FREIGHT &amp; BUNKER MONITOR</div>
+    <div class="brandrow">
+      <div>
+        <h1>운임 · 벙커 관리자 콘솔</h1>
+        <div class="subtitle">
+          독립형 대시보드 HTML 원본 저장 · Google Sheet 아카이브 · GitHub 날짜별 발행
+        </div>
+      </div>
+      <div class="console">
+        <b>ADMIN CONSOLE</b>
+        <strong>Research Data Publishing</strong>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="statusbar">
+  <div class="wrap">
+    <span class="pill" id="sheetPill">Google Sheet 대기</span>
+    <span class="pill" id="adminPill">관리자 미인증</span>
+    <span class="pill" id="githubPill">GitHub 확인 전</span>
+  </div>
+</div>
+
+<main class="wrap">
+
+  <div class="section">
+    <div class="step">01</div>
+    <section class="card">
+      <div class="cardhead">
+        <div>
+          <div class="kicker">ACCESS CONTROL</div>
+          <h2>관리자 인증</h2>
+        </div>
+      </div>
+      <div class="row">
+        <div style="flex:1;min-width:240px">
+          <input id="adminPassword" type="password" placeholder="관리자 비밀번호">
+        </div>
+        <button class="primary" onclick="checkAdmin()">연결 확인</button>
+      </div>
+      <div id="adminStatus" class="small" style="margin-top:7px">
+        Apps Script에서 설정한 관리자 비밀번호로 인증
+      </div>
+    </section>
+  </div>
+
+  <div class="section" id="githubSection" style="display:none">
+    <div class="step">02</div>
+    <section class="card">
+      <div class="cardhead">
+        <div>
+          <div class="kicker">PUBLISH TARGET</div>
+          <h2>GitHub 연결</h2>
+        </div>
+      </div>
+
+      <div class="grid3">
+        <div class="kv">저장소<strong id="repoText">-</strong></div>
+        <div class="kv">브랜치<strong id="branchText">-</strong></div>
+        <div class="kv">Pages Base<strong id="pagesText">-</strong></div>
+      </div>
+
+      <div id="tokenSetup" style="display:none;margin-top:11px">
+        <input id="githubToken" type="password"
+          placeholder="GitHub Fine-grained Personal Access Token">
+        <div class="small" style="margin-top:5px">
+          토큰은 Apps Script Script Properties에만 저장. 저장소 Contents 권한 Read and write 필요.
+        </div>
+        <div style="margin-top:8px">
+          <button class="secondary" onclick="saveToken()">GitHub Token 저장</button>
+        </div>
+      </div>
+
+      <div id="tokenOk" class="info good" style="display:none">
+        GitHub 연결 준비 완료
+      </div>
+    </section>
+  </div>
+
+  <div class="section">
+    <div class="step">03</div>
+    <section class="card">
+      <div class="cardhead">
+        <div>
+          <div class="kicker">HTML PACKAGE</div>
+          <h2>독립형 대시보드 선택</h2>
+        </div>
+        <div class="small">파일명 기준일과 HTML 내부 rawData 기준일 자동 대조</div>
+      </div>
+
+      <label class="upload" id="dropZone">
+        <input id="fileInput" type="file" accept=".html,text/html">
+        <div>
+          <div class="uploadIcon">H</div>
+          <div class="filename" id="fileNameText">HTML 파일 선택</div>
+          <div class="small" style="margin-top:5px">
+            클릭하거나 파일을 여기에 놓기<br>
+            <strong>freight_bunker_dashboard_YYYY-MM-DD.html</strong>
+          </div>
+        </div>
+      </label>
+
+      <div id="fileStatus" class="info">아직 선택된 파일 없음</div>
+      <div id="validationBadges" class="validation"></div>
+
+      <div class="row" style="margin-top:11px">
+        <button class="ghost" id="previewBtn" onclick="previewFile()" disabled>미리보기</button>
+        <button class="secondary" id="sheetSaveBtn" onclick="saveFile(false)" disabled>Google Sheet 저장</button>
+        <button class="success" id="publishBtn" onclick="saveFile(true)" disabled>Sheet 저장 + GitHub 발행</button>
+      </div>
+    </section>
+  </div>
+
+  <div class="section" id="previewSection" style="display:none">
+    <div class="step">04</div>
+    <section class="card">
+      <div class="cardhead">
+        <div>
+          <div class="kicker">QUALITY CHECK</div>
+          <h2>HTML 미리보기</h2>
+        </div>
+      </div>
+      <iframe id="previewFrame" class="preview" sandbox="allow-scripts"></iframe>
+    </section>
+  </div>
+
+  <div class="section" id="resultSection" style="display:none">
+    <div class="step">05</div>
+    <section class="card">
+      <div class="cardhead">
+        <div>
+          <div class="kicker">PUBLISH RESULT</div>
+          <h2>저장 결과</h2>
+        </div>
+      </div>
+      <div id="resultBox" class="result"></div>
+    </section>
+  </div>
+
+  <div class="section" id="archiveSection" style="display:none">
+    <div class="step">06</div>
+    <section class="card">
+      <div class="cardhead">
+        <div>
+          <div class="kicker">ARCHIVE</div>
+          <h2>최근 저장본</h2>
+        </div>
+        <button class="ghost" onclick="loadArchive()">새로고침</button>
+      </div>
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr>
+              <th>기준일</th>
+              <th>제목</th>
+              <th>상태</th>
+              <th>HTML</th>
+              <th>수정일시</th>
+              <th>작업</th>
+            </tr>
+          </thead>
+          <tbody id="archiveBody">
+            <tr><td colspan="6" class="small">관리자 인증 후 표시</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+</main>
+
+<script>
+let selectedFile = null;
+let selectedHtml = '';
+let selectedDate = '';
+let adminVerified = false;
+let githubReady = false;
+
+const $ = id => document.getElementById(id);
+const fileInput = $('fileInput');
+const dropZone = $('dropZone');
+
+fileInput.addEventListener('change', e => {
+  if (e.target.files && e.target.files[0]) loadFile(e.target.files[0]);
+});
+
+['dragenter','dragover'].forEach(ev => {
+  dropZone.addEventListener(ev, e => {
+    e.preventDefault();
+    dropZone.classList.add('drag');
+  });
+});
+
+['dragleave','drop'].forEach(ev => {
+  dropZone.addEventListener(ev, e => {
+    e.preventDefault();
+    dropZone.classList.remove('drag');
+  });
+});
+
+dropZone.addEventListener('drop', e => {
+  const f = e.dataTransfer.files && e.dataTransfer.files[0];
+  if (f) loadFile(f);
+});
+
+function password(){
+  return $('adminPassword').value;
+}
+
+function pill(id, text, on){
+  const el = $(id);
+  el.textContent = text;
+  el.className = 'pill' + (on ? ' on' : '');
+}
+
+function setAdminStatus(text, good){
+  $('adminStatus').textContent = text;
+  $('adminStatus').className = 'small ' + (good ? 'good' : 'bad');
+}
+
+function checkAdmin(){
+  const pw = password();
+  if (!pw) {
+    setAdminStatus('관리자 비밀번호를 입력하세요.', false);
+    return;
+  }
+
+  setAdminStatus('연결 확인 중...', true);
+
+  google.script.run
+    .withSuccessHandler(cfg => {
+      adminVerified = true;
+      githubReady = !!cfg.github.tokenConfigured;
+
+      setAdminStatus('관리자 인증 완료', true);
+      pill('sheetPill', cfg.spreadsheetName + ' 연결', true);
+      pill('adminPill', '관리자 인증 완료', true);
+      pill('githubPill', githubReady ? 'GitHub 준비 완료' : 'GitHub Token 필요', githubReady);
+
+      $('githubSection').style.display = '';
+      $('archiveSection').style.display = '';
+      $('repoText').textContent = cfg.github.owner + '/' + cfg.github.repo;
+      $('branchText').textContent = cfg.github.branch;
+      $('pagesText').textContent = cfg.github.pagesBase;
+
+      $('tokenSetup').style.display = githubReady ? 'none' : '';
+      $('tokenOk').style.display = githubReady ? '' : 'none';
+
+      renderArchive((cfg.recent || []));
+      refreshButtons();
+    })
+    .withFailureHandler(err => {
+      adminVerified = false;
+      githubReady = false;
+      setAdminStatus(err.message || String(err), false);
+      pill('adminPill', '관리자 인증 실패', false);
+      refreshButtons();
+    })
+    .getAdminConfig(pw);
+}
+
+function saveToken(){
+  const token = $('githubToken').value.trim();
+  if (!token) return;
+
+  google.script.run
+    .withSuccessHandler(() => {
+      githubReady = true;
+      $('githubToken').value = '';
+      $('tokenSetup').style.display = 'none';
+      $('tokenOk').style.display = '';
+      pill('githubPill', 'GitHub 준비 완료', true);
+      refreshButtons();
+    })
+    .withFailureHandler(err => {
+      alert(err.message || String(err));
+    })
+    .saveGithubTokenFromAdmin(password(), token);
+}
+
+function loadFile(file){
+  selectedFile = null;
+  selectedHtml = '';
+  selectedDate = '';
+  $('validationBadges').innerHTML = '';
+  $('fileNameText').textContent = file.name || '';
+
+  const m = /^freight_bunker_dashboard_(\d{4}-\d{2}-\d{2})(?:_[A-Za-z0-9_-]+)?\.html$/i.exec(file.name || '');
+  if (!m) {
+    $('fileStatus').innerHTML =
+      '<span class="bad">파일명 오류 · freight_bunker_dashboard_YYYY-MM-DD.html 형식 필요</span>';
+    refreshButtons();
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = () => {
+    const html = String(reader.result || '');
+
+    if (!/<html\b/i.test(html) || !/<body\b/i.test(html)) {
+      $('fileStatus').innerHTML =
+        '<span class="bad">독립형 HTML 구조를 찾을 수 없음</span>';
+      refreshButtons();
+      return;
+    }
+
+    selectedFile = file;
+    selectedHtml = html;
+    selectedDate = m[1];
+
+    const badges = [];
+    badges.push('<span class="badge ok">HTML 구조 정상</span>');
+
+    if (/id\s*=\s*["']rawData["']/i.test(html)) {
+      badges.push('<span class="badge ok">rawData</span>');
+    } else {
+      badges.push('<span class="badge warn">rawData 미감지</span>');
+    }
+
+    if (/id\s*=\s*["']cmtData["']/i.test(html)) {
+      badges.push('<span class="badge ok">cmtData</span>');
+    } else {
+      badges.push('<span class="badge warn">cmtData 미감지</span>');
+    }
+
+    const remote =
+      /<script\b[^>]*\bsrc\s*=\s*["']https?:\/\//i.test(html) ||
+      /<link\b[^>]*\bhref\s*=\s*["']https?:\/\//i.test(html) ||
+      /@import\s+(?:url\()?["']?https?:\/\//i.test(html);
+
+    badges.push(
+      remote
+        ? '<span class="badge warn">외부 의존성 감지 · 서버 검증 필요</span>'
+        : '<span class="badge ok">외부 CDN 없음</span>'
+    );
+
+    $('validationBadges').innerHTML = badges.join('');
+    $('fileStatus').innerHTML =
+      '<span class="good"><strong>인식 완료</strong></span> · 기준일 ' +
+      esc(selectedDate) + ' · ' + Number(file.size || 0).toLocaleString('ko-KR') + ' bytes';
+
+    refreshButtons();
+  };
+
+  reader.onerror = () => {
+    $('fileStatus').innerHTML = '<span class="bad">파일을 읽지 못했습니다.</span>';
+    refreshButtons();
+  };
+
+  reader.readAsText(file, 'UTF-8');
+}
+
+function refreshButtons(){
+  const fileOk = !!selectedFile && !!selectedHtml;
+  $('previewBtn').disabled = !fileOk;
+  $('sheetSaveBtn').disabled = !(fileOk && adminVerified);
+  $('publishBtn').disabled = !(fileOk && adminVerified && githubReady);
+}
+
+function previewFile(){
+  if (!selectedHtml) return;
+  $('previewSection').style.display = '';
+  $('previewFrame').srcdoc = selectedHtml;
+  $('previewSection').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function saveFile(publishToGithub){
+  if (!selectedFile || !selectedHtml || !adminVerified) return;
+  if (publishToGithub && !githubReady) {
+    alert('GitHub Token 연결이 필요합니다.');
+    return;
+  }
+
+  const btn = publishToGithub ? $('publishBtn') : $('sheetSaveBtn');
+  const original = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = publishToGithub ? '저장·발행 중...' : '저장 중...';
+
+  google.script.run
+    .withSuccessHandler(r => {
+      btn.textContent = original;
+      refreshButtons();
+
+      $('resultSection').style.display = '';
+
+      const warnings = (r.warnings || []).length
+        ? '<br><span style="color:#8A5A00">검증 참고: ' +
+          esc((r.warnings || []).join(' / ')) + '</span>'
+        : '';
+
+      const link = r.githubUrl
+        ? '<br><a href="' + escAttr(r.githubUrl) + '" target="_blank">발행 페이지 열기 ↗</a>'
+        : '';
+
+      $('resultBox').innerHTML =
+        '<strong>' + (r.overwritten ? '기존 기준일 업데이트' : '신규 저장') + ' 완료</strong><br>' +
+        '기준일: ' + esc(r.date) + '<br>' +
+        '원본 HTML: ' + Number(r.htmlChars || 0).toLocaleString('ko-KR') + '자 · ' +
+        Number(r.htmlChunks || 0).toLocaleString('ko-KR') + '개 청크<br>' +
+        '저장: Google Sheet DAILY_HTML' +
+        (r.githubPublished ? '<br>GitHub: ' + esc(r.githubPath) : '') +
+        warnings + link;
+
+      $('resultSection').scrollIntoView({behavior:'smooth',block:'start'});
+      loadArchive();
+    })
+    .withFailureHandler(err => {
+      btn.textContent = original;
+      refreshButtons();
+      alert(err.message || String(err));
+    })
+    .saveHtmlFromAdmin({
+      adminPassword: password(),
+      fileName: selectedFile.name,
+      htmlText: selectedHtml,
+      publishToGithub: !!publishToGithub
+    });
+}
+
+function loadArchive(){
+  if (!adminVerified) return;
+
+  google.script.run
+    .withSuccessHandler(r => renderArchive((r && r.reports) || []))
+    .withFailureHandler(err => {
+      $('archiveBody').innerHTML =
+        '<tr><td colspan="6" class="bad">' + esc(err.message || String(err)) + '</td></tr>';
+    })
+    .getRecentReportsFromAdmin(password(), 40);
+}
+
+function renderArchive(rows){
+  const body = $('archiveBody');
+
+  if (!rows.length) {
+    body.innerHTML = '<tr><td colspan="6" class="small">저장된 HTML 없음</td></tr>';
+    return;
+  }
+
+  body.innerHTML = rows.map(r => {
+    const open = r.viewUrl
+      ? '<button class="ghost" onclick="window.open(\'' + jsq(r.viewUrl) + '\',\'_blank\')">열기</button>'
+      : '';
+
+    return '<tr>' +
+      '<td class="num"><strong>' + esc(r.date) + '</strong></td>' +
+      '<td>' + esc(r.title || '') + '</td>' +
+      '<td>' + esc(r.status || '') + '</td>' +
+      '<td class="num">' + Number(r.htmlChars || 0).toLocaleString('ko-KR') + '</td>' +
+      '<td class="num">' + esc(r.updatedAt || '') + '</td>' +
+      '<td><div class="actions">' +
+        open +
+        '<button class="secondary" onclick="downloadStored(\'' + jsq(r.date) + '\')">HTML 저장</button>' +
+      '</div></td>' +
+    '</tr>';
+  }).join('');
+}
+
+function downloadStored(date){
+  google.script.run
+    .withSuccessHandler(r => {
+      const blob = new Blob([r.htmlText], {type:'text/html;charset=utf-8'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = r.fileName || ('freight_bunker_dashboard_' + date + '.html');
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    })
+    .withFailureHandler(err => alert(err.message || String(err)))
+    .getStoredHtmlFromAdmin(password(), date);
+}
+
+function esc(v){
+  return String(v ?? '').replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
+
+function escAttr(v){ return esc(v); }
+
+function jsq(v){
+  return String(v ?? '')
+    .replace(/\\/g,'\\\\')
+    .replace(/'/g,"\\'")
+    .replace(/\r?\n/g,' ');
+}
+</script>
+</body>
+</html>
