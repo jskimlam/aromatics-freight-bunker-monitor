@@ -10,9 +10,12 @@
  *   ?action=listReports&limit=100
  *   ?action=getReportHtml&date=2026-09-28
  *
- * Upload filename:
+ * Upload filename (recommended):
+ *   freight_YYYYMMDD.html
+ *   e.g. freight_20260925.html
+ *
+ * Backward compatible:
  *   freight_bunker_dashboard_YYYY-MM-DD.html
- *   Optional suffix allowed:
  *   freight_bunker_dashboard_YYYY-MM-DD_research.html
  */
 
@@ -325,15 +328,26 @@ function getStoredHtmlFromAdmin(adminPassword, date) {
  * ========================================================= */
 
 function classifyFilename_(fileName) {
-  const m = /^freight_bunker_dashboard_(\d{4}-\d{2}-\d{2})(?:_[A-Za-z0-9_-]+)?\.html$/i.exec(fileName);
-  if (!m) {
-    throw new Error(
-      '파일명은 freight_bunker_dashboard_YYYY-MM-DD.html 형식이어야 합니다.'
-    );
+  fileName = String(fileName || '').trim();
+
+  // Recommended short filename: freight_YYYYMMDD.html
+  let m = /^freight_(\d{4})(\d{2})(\d{2})\.html$/i.exec(fileName);
+  if (m) {
+    const date = m[1] + '-' + m[2] + '-' + m[3];
+    requireDate_(date);
+    return {date: date};
   }
 
-  requireDate_(m[1]);
-  return {date: m[1]};
+  // Backward compatibility with the original long filename.
+  m = /^freight_bunker_dashboard_(\d{4}-\d{2}-\d{2})(?:_[A-Za-z0-9_-]+)?\.html$/i.exec(fileName);
+  if (m) {
+    requireDate_(m[1]);
+    return {date: m[1]};
+  }
+
+  throw new Error(
+    '파일명은 freight_YYYYMMDD.html 형식을 사용해 주세요. 예: freight_20260925.html'
+  );
 }
 
 
@@ -559,7 +573,7 @@ function getReportHtml_(date) {
   return {
     ok: true,
     date: date,
-    fileName: master ? master.filename : ('freight_bunker_dashboard_' + date + '.html'),
+    fileName: master ? master.filename : ('freight_' + date.replace(/-/g, '') + '.html'),
     htmlText: html,
     htmlChars: html.length,
     chunks: values.length
