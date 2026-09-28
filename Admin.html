@@ -3,652 +3,218 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Aromatics Freight & Bunker Admin</title>
+<title>F/B LAM Admin</title>
 <style>
-:root{
-  --navy:#071D49;
-  --navy2:#0B2A6B;
-  --blue:#2A78D6;
-  --cyan:#44B6E8;
-  --gold:#D2AE4B;
-  --ink:#0F172A;
-  --muted:#64748B;
-  --line:#DCE5F0;
-  --tint:#F4F7FB;
-  --tint2:#EAF2FB;
-  --good:#117A55;
-  --bad:#B42318;
-  --white:#FFFFFF;
-}
 *{box-sizing:border-box}
-html,body{margin:0;background:#EEF3F8;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic","Segoe UI",sans-serif}
-body{min-height:100vh}
-.mast{
-  background:
-    radial-gradient(circle at 78% 18%,rgba(68,182,232,.22),transparent 28%),
-    linear-gradient(135deg,var(--navy),var(--navy2) 72%,#103A83);
-  color:#fff;border-bottom:4px solid var(--gold)
-}
-.wrap{max-width:1100px;margin:0 auto;padding-left:18px;padding-right:18px}
-.mast .wrap{padding-top:26px;padding-bottom:26px}
-.eyebrow{font-size:10px;letter-spacing:.18em;font-weight:800;color:#9FC7F5}
-.brandrow{display:flex;justify-content:space-between;gap:20px;align-items:flex-end;flex-wrap:wrap}
-h1{font-size:clamp(23px,3.1vw,36px);line-height:1.15;margin:7px 0 0;font-weight:800;letter-spacing:-.035em}
-.subtitle{font-size:12px;color:#CFDDF1;margin-top:8px;line-height:1.65}
-.console{
-  min-width:180px;border-left:1px solid rgba(255,255,255,.25);padding-left:16px;
-  text-align:right
-}
-.console b{display:block;font-size:11px;color:#8ED7F7;letter-spacing:.12em}
-.console strong{display:block;font-size:15px;margin-top:3px}
-.statusbar{background:#fff;border-bottom:1px solid var(--line)}
-.statusbar .wrap{display:flex;gap:8px;flex-wrap:wrap;padding-top:9px;padding-bottom:9px}
-.pill{
-  font-size:11px;border:1px solid var(--line);border-radius:999px;padding:4px 9px;
-  background:var(--tint);color:var(--muted)
-}
-.pill.on{background:#EAF8F2;border-color:#BEE7D5;color:#0C6848}
-main.wrap{padding-top:18px;padding-bottom:44px}
-.section{
-  display:grid;grid-template-columns:52px minmax(0,1fr);gap:14px;
-  margin-bottom:15px
-}
-.step{
-  width:42px;height:42px;border-radius:12px;background:var(--navy2);color:#fff;
-  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;
-  box-shadow:0 5px 14px rgba(7,29,73,.16)
-}
-.card{
-  background:#fff;border:1px solid var(--line);border-radius:14px;
-  padding:17px 18px;box-shadow:0 4px 18px rgba(15,23,42,.045)
-}
-.cardhead{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:13px}
-.card h2{font-size:15px;margin:0;font-weight:800;letter-spacing:-.015em}
-.kicker{font-size:10px;color:var(--blue);font-weight:800;letter-spacing:.12em;margin-bottom:3px}
-.small{font-size:11px;color:var(--muted);line-height:1.65}
-.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-.kv{
-  border:1px solid var(--line);background:var(--tint);border-radius:10px;padding:10px 11px;
-  font-size:10px;color:var(--muted)
-}
-.kv strong{display:block;font-size:12px;color:var(--ink);margin-top:3px;word-break:break-all}
-input[type=password],input[type=text]{
-  width:100%;border:1px solid #C8D4E3;background:#fff;border-radius:9px;
-  padding:10px 11px;font:inherit;font-size:13px;outline:none
-}
-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(42,120,214,.10)}
-button{
-  border:0;border-radius:9px;padding:9px 13px;cursor:pointer;font:inherit;
-  font-size:12px;font-weight:800;transition:.15s ease
-}
-button:hover:not(:disabled){transform:translateY(-1px)}
-button:disabled{opacity:.42;cursor:not-allowed;transform:none}
-.primary{background:var(--navy2);color:#fff}
-.blue{background:var(--blue);color:#fff}
-.success{background:var(--good);color:#fff}
-.secondary{background:#E8EEF6;color:#334155}
-.ghost{background:#fff;color:var(--navy2);border:1px solid #C7D5E8}
-.upload{
-  display:flex;align-items:center;justify-content:center;min-height:150px;
-  border:1.5px dashed #9FB1C8;border-radius:12px;background:linear-gradient(180deg,#FAFCFE,#F4F8FC);
-  cursor:pointer;text-align:center;padding:22px;transition:.15s
-}
-.upload:hover,.upload.drag{border-color:var(--blue);background:#EEF6FF}
-.upload input{display:none}
-.uploadIcon{
-  width:44px;height:44px;border-radius:13px;margin:0 auto 10px;
-  background:linear-gradient(135deg,var(--navy2),var(--blue));color:#fff;
-  display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900
-}
-.filename{font-size:14px;font-weight:800}
-.good{color:var(--good)} .bad{color:var(--bad)}
-.info{
-  margin-top:10px;padding:10px 11px;border-radius:9px;background:var(--tint);
-  border:1px solid var(--line);font-size:11px;line-height:1.65;color:#475569
-}
-.validation{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
-.badge{
-  padding:3px 7px;border-radius:999px;font-size:10px;font-weight:700;
-  background:#EDF2F8;color:#52647A;border:1px solid #D7E0EB
-}
-.badge.ok{background:#E8F7F1;color:#0C6848;border-color:#BEE7D5}
-.badge.warn{background:#FFF7E6;color:#8A5A00;border-color:#F3D99B}
-.preview{
-  width:100%;height:590px;border:1px solid #C8D4E3;border-radius:10px;background:#fff
-}
-.result{
-  border-left:4px solid var(--good);background:#F0FAF6;border-radius:9px;
-  padding:12px 13px;font-size:12px;line-height:1.8
-}
-.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:10px}
-table{width:100%;border-collapse:collapse;font-size:11px;background:#fff}
-th{
-  text-align:left;background:#F4F7FB;color:#475569;padding:9px 10px;
-  border-bottom:1px solid var(--line);white-space:nowrap
-}
-td{padding:9px 10px;border-bottom:1px solid #EDF1F6;vertical-align:middle}
-tr:last-child td{border-bottom:0}
-td.num{font-variant-numeric:tabular-nums}
-.actions{display:flex;gap:5px;white-space:nowrap}
-.actions button{padding:5px 8px;font-size:10px}
-a{color:var(--blue)}
-.sep{height:1px;background:var(--line);margin:13px 0}
-@media(max-width:760px){
-  .section{grid-template-columns:1fr;gap:7px}
-  .step{width:auto;height:28px;border-radius:7px;justify-content:flex-start;padding-left:10px}
-  .grid2,.grid3{grid-template-columns:1fr}
-  .console{text-align:left;border-left:0;border-top:1px solid rgba(255,255,255,.22);padding:10px 0 0;min-width:100%}
-  .preview{height:420px}
-}
+body{margin:0;background:#f1f5f9;color:#0f172a;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{background:linear-gradient(135deg,#0f172a,#1e3a5f);color:#fff;padding:24px 18px}
+.wrap{max-width:900px;margin:auto}
+h1{font-size:22px;margin:0}.sub{font-size:12px;color:#cbd5e1;margin-top:7px;line-height:1.7}
+main{padding:16px}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.card h2{font-size:14px;margin:0 0 12px}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+input[type=password]{width:100%;border:1px solid #cbd5e1;border-radius:8px;padding:10px 11px;font-size:13px}
+button{border:0;border-radius:8px;padding:9px 13px;cursor:pointer;font-weight:700;font-size:12px}
+.primary{background:#1e40af;color:white}.secondary{background:#e2e8f0;color:#334155}.success{background:#166534;color:white}
+button:disabled{opacity:.45;cursor:not-allowed}
+label.upload{display:flex;align-items:center;justify-content:center;min-height:155px;border:2px dashed #94a3b8;border-radius:10px;cursor:pointer;background:#f8fafc;padding:20px;text-align:center}
+label.upload.drag{background:#eff6ff;border-color:#2563eb}label.upload input{display:none}
+.filename{font-weight:800;font-size:14px;word-break:break-all}.hint{font-size:11px;color:#64748b;line-height:1.7;margin-top:5px}
+.good{color:#166534}.bad{color:#b91c1c}.warn{color:#92400e}
+.meta{display:grid;grid-template-columns:110px 1fr;gap:7px 10px;margin-top:12px;padding:11px 12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:9px;font-size:11px}
+.meta .k{font-weight:800;color:#475569}.meta .v{color:#0f172a;word-break:break-word}
+.badge{display:inline-block;padding:2px 8px;border-radius:999px;font-weight:800;font-size:10px}
+.badge.daily{background:#dbeafe;color:#1e40af}
+.preview{width:100%;height:520px;border:1px solid #cbd5e1;border-radius:9px;background:white}
+.result{background:#ecfdf5;border:1px solid #bbf7d0;border-radius:9px;padding:12px;font-size:12px;line-height:1.8}
+.rules{font-size:11px;line-height:1.7;background:#f8fafc;border:1px solid #e2e8f0;border-radius:9px;padding:10px 12px;margin-bottom:12px;color:#475569}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#0f172a}
+@media(max-width:640px){.preview{height:420px}.meta{grid-template-columns:85px 1fr}}
 </style>
 </head>
 <body>
-
-<header class="mast">
-  <div class="wrap">
-    <div class="eyebrow">AROMATICS FREIGHT &amp; BUNKER MONITOR</div>
-    <div class="brandrow">
-      <div>
-        <h1>ìš´ì„ Â· ë²™ì»¤ ê´€ë¦¬ì ì½˜ì†”</h1>
-        <div class="subtitle">
-          ë…ë¦½í˜• ëŒ€ì‹œë³´ë“œ HTML ì›ë³¸ ì €ì¥ Â· Google Sheet ì•„ì¹´ì´ë¸Œ Â· GitHub ë‚ ì§œë³„ ë°œí–‰
-        </div>
-      </div>
-      <div class="console">
-        <b>ADMIN CONSOLE</b>
-        <strong>Research Data Publishing</strong>
-      </div>
-    </div>
-  </div>
-</header>
-
-<div class="statusbar">
-  <div class="wrap">
-    <span class="pill" id="sheetPill">Google Sheet ëŒ€ê¸°</span>
-    <span class="pill" id="adminPill">ê´€ë¦¬ì ë¯¸ì¸ì¦</span>
-    <span class="pill" id="githubPill">GitHub í™•ì¸ ì „</span>
-  </div>
-</div>
+<header><div class="wrap">
+  <h1>ğŸ“¤ F/B LAM ê´€ë¦¬ì</h1>
+  <div class="sub">ë°ì¼ë¦¬ ì›ë³¸ HTML ì „ì²´ë¥¼ ì €ì¥í•©ë‹ˆë‹¤. HTML ì›ë³¸ì€ ê·¸ëŒ€ë¡œ ë³´ì¡´ë˜ë©° ìµœì‹  ë¦¬í¬íŠ¸ì—ë„ í•¨ê»˜ ë°˜ì˜ë©ë‹ˆë‹¤.</div>
+</div></header>
 
 <main class="wrap">
+  <section class="card">
+    <h2>1. ê´€ë¦¬ì ì¸ì¦</h2>
+    <div class="row">
+      <div style="flex:1;min-width:240px"><input id="adminPassword" type="password" placeholder="ê´€ë¦¬ì ë¹„ë°€ë²ˆí˜¸"></div>
+      <button class="primary" onclick="checkAdmin()">ì—°ê²° í™•ì¸</button>
+    </div>
+    <div id="adminStatus" class="hint">ë¨¼ì € ê´€ë¦¬ì ë¹„ë°€ë²ˆí˜¸ë¥¼ ì…ë ¥í•˜ì„¸ìš”.</div>
+  </section>
 
-  <div class="section">
-    <div class="step">01</div>
-    <section class="card">
-      <div class="cardhead">
-        <div>
-          <div class="kicker">ACCESS CONTROL</div>
-          <h2>ê´€ë¦¬ì ì¸ì¦</h2>
-        </div>
-      </div>
-      <div class="row">
-        <div style="flex:1;min-width:240px">
-          <input id="adminPassword" type="password" placeholder="ê´€ë¦¬ì ë¹„ë°€ë²ˆí˜¸">
-        </div>
-        <button class="primary" onclick="checkAdmin()">ì—°ê²° í™•ì¸</button>
-      </div>
-      <div id="adminStatus" class="small" style="margin-top:7px">
-        Apps Scriptì—ì„œ ì„¤ì •í•œ ê´€ë¦¬ì ë¹„ë°€ë²ˆí˜¸ë¡œ ì¸ì¦
-      </div>
-    </section>
-  </div>
+  <section class="card">
+    <h2>2. HTML ì—…ë¡œë“œ</h2>
+    <div class="rules">
+      <strong>íŒŒì¼ëª… ê·œì¹™</strong><br>
+      ë°ì¼ë¦¬: <code>freight_YYYYMMDD.html</code><br>
+      ì˜ˆ: <code>freight_20260928.html</code><br>
+      <span class="warn">ëŒ€ì‹œë³´ë“œ í™”ë©´Â·ì°¨íŠ¸Â·ì¸ì‡„ ì„¤ì •ì„ ììœ ë¡­ê²Œ ë³€ê²½í•  ìˆ˜ ìˆìŠµë‹ˆë‹¤. ì—…ë¡œë“œí•œ ì›ë³¸ HTMLì€ ì„ì˜ë¡” ê°€ê³µí•˜ì§€ ì•Šê³  ê·¸ëŒ€ë¡” ë³´ì¡´í•©ë‹ˆë‹¤.</span>
+    </div>
 
-  <div class="section" id="githubSection" style="display:none">
-    <div class="step">02</div>
-    <section class="card">
-      <div class="cardhead">
-        <div>
-          <div class="kicker">PUBLISH TARGET</div>
-          <h2>GitHub ì—°ê²°</h2>
-        </div>
+    <label class="upload" id="dropZone">
+      <input id="fileInput" type="file" accept=".html,text/html">
+      <div>
+        <div style="font-size:28px">ğŸ“„</div>
+        <div class="filename" id="fileNameText">HTML íŒŒì¼ ì„ íƒ</div>
+        <div class="hint">í´ë¦­í•˜ê±°ë‚˜ ì—¬ê¸°ì— íŒŒì¼ì„ ë†“ìœ¼ì„¸ìš”.</div>
       </div>
+    </label>
 
-      <div class="grid3">
-        <div class="kv">ì €ì¥ì†Œ<strong id="repoText">-</strong></div>
-        <div class="kv">ë¸Œëœì¹˜<strong id="branchText">-</strong></div>
-        <div class="kv">Pages Base<strong id="pagesText">-</strong></div>
-      </div>
+    <div id="fileStatus" class="hint"></div>
+    <div id="fileMeta" class="meta" style="display:none"></div>
 
-      <div id="tokenSetup" style="display:none;margin-top:11px">
-        <input id="githubToken" type="password"
-          placeholder="GitHub Fine-grained Personal Access Token">
-        <div class="small" style="margin-top:5px">
-          í† í°ì€ Apps Script Script Propertiesì—ë§Œ ì €ì¥. ì €ì¥ì†Œ Contents ê¶Œí•œ Read and write í•„ìš”.
-        </div>
-        <div style="margin-top:8px">
-          <button class="secondary" onclick="saveToken()">GitHub Token ì €ì¥</button>
-        </div>
-      </div>
+    <div class="row" style="margin-top:12px">
+      <button class="secondary" id="previewBtn" onclick="previewFile()" disabled>ë¯¸ë¦¬ë³´ê¸°</button>
+      <button class="success" id="saveBtn" onclick="saveFile()" disabled>Google Sheet ì €ì¥</button>
+    </div>
+  </section>
 
-      <div id="tokenOk" class="info good" style="display:none">
-        GitHub ì—°ê²° ì¤€ë¹„ ì™„ë£Œ
-      </div>
-    </section>
-  </div>
+  <section class="card" id="previewCard" style="display:none">
+    <h2>3. ë¯¸ë¦¬ë³´ê¸°</h2>
+    <iframe id="previewFrame" class="preview" sandbox="allow-scripts allow-same-origin allow-downloads allow-popups"></iframe>
+  </section>
 
-  <div class="section">
-    <div class="step">03</div>
-    <section class="card">
-      <div class="cardhead">
-        <div>
-          <div class="kicker">HTML PACKAGE</div>
-          <h2>ë…ë¦½í˜• ëŒ€ì‹œë³´ë“œ ì„ íƒ</h2>
-        </div>
-        <div class="small">íŒŒì¼ëª… ê¸°ì¤€ì¼ê³¼ HTML ë‚´ë¶€ rawData ê¸°ì¤€ì¼ ìë™ ëŒ€ì¡° Â· ì˜ˆ: freight_20260925.html</div>
-      </div>
-
-      <label class="upload" id="dropZone">
-        <input id="fileInput" type="file" accept=".html,text/html">
-        <div>
-          <div class="uploadIcon">H</div>
-          <div class="filename" id="fileNameText">HTML íŒŒì¼ ì„ íƒ</div>
-          <div class="small" style="margin-top:5px">
-            í´ë¦­í•˜ê±°ë‚˜ íŒŒì¼ì„ ì—¬ê¸°ì— ë†“ê¸°<br>
-            <strong>freight_YYYYMMDD.html</strong>
-          </div>
-        </div>
-      </label>
-
-      <div id="fileStatus" class="info">ì•„ì§ ì„ íƒëœ íŒŒì¼ ì—†ìŒ</div>
-      <div id="validationBadges" class="validation"></div>
-
-      <div class="row" style="margin-top:11px">
-        <button class="ghost" id="previewBtn" onclick="previewFile()" disabled>ë¯¸ë¦¬ë³´ê¸°</button>
-        <button class="secondary" id="sheetSaveBtn" onclick="saveFile(false)" disabled>Google Sheet ì €ì¥</button>
-        <button class="success" id="publishBtn" onclick="saveFile(true)" disabled>Sheet ì €ì¥ + GitHub ë°œí–‰</button>
-      </div>
-    </section>
-  </div>
-
-  <div class="section" id="previewSection" style="display:none">
-    <div class="step">04</div>
-    <section class="card">
-      <div class="cardhead">
-        <div>
-          <div class="kicker">QUALITY CHECK</div>
-          <h2>HTML ë¯¸ë¦¬ë³´ê¸°</h2>
-        </div>
-      </div>
-      <iframe id="previewFrame" class="preview" sandbox="allow-scripts"></iframe>
-    </section>
-  </div>
-
-  <div class="section" id="resultSection" style="display:none">
-    <div class="step">05</div>
-    <section class="card">
-      <div class="cardhead">
-        <div>
-          <div class="kicker">PUBLISH RESULT</div>
-          <h2>ì €ì¥ ê²°ê³¼</h2>
-        </div>
-      </div>
-      <div id="resultBox" class="result"></div>
-    </section>
-  </div>
-
-  <div class="section" id="archiveSection" style="display:none">
-    <div class="step">06</div>
-    <section class="card">
-      <div class="cardhead">
-        <div>
-          <div class="kicker">ARCHIVE</div>
-          <h2>ìµœê·¼ ì €ì¥ë³¸</h2>
-        </div>
-        <button class="ghost" onclick="loadArchive()">ìƒˆë¡œê³ ì¹¨</button>
-      </div>
-      <div class="tablewrap">
-        <table>
-          <thead>
-            <tr>
-              <th>ê¸°ì¤€ì¼</th>
-              <th>ì œëª©</th>
-              <th>ìƒíƒœ</th>
-              <th>HTML</th>
-              <th>ìˆ˜ì •ì¼ì‹œ</th>
-              <th>ì‘ì—…</th>
-            </tr>
-          </thead>
-          <tbody id="archiveBody">
-            <tr><td colspan="6" class="small">ê´€ë¦¬ì ì¸ì¦ í›„ í‘œì‹œ</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-  </div>
-
+  <section class="card" id="resultCard" style="display:none">
+    <h2>ì €ì¥ ì™„ë£Œ</h2>
+    <div id="resultBox" class="result"></div>
+  </section>
 </main>
 
 <script>
-let selectedFile = null;
-let selectedHtml = '';
-let selectedDate = '';
-let adminVerified = false;
-let githubReady = false;
+let selectedFile=null;
+let selectedHtml='';
+let selectedMeta=null;
+let adminVerified=false;
 
-const $ = id => document.getElementById(id);
-const fileInput = $('fileInput');
-const dropZone = $('dropZone');
+const fileInput=document.getElementById('fileInput');
+const dropZone=document.getElementById('dropZone');
 
-fileInput.addEventListener('change', e => {
-  if (e.target.files && e.target.files[0]) loadFile(e.target.files[0]);
-});
+fileInput.addEventListener('change',e=>{if(e.target.files&&e.target.files[0])loadFile(e.target.files[0]);});
+['dragenter','dragover'].forEach(ev=>dropZone.addEventListener(ev,e=>{e.preventDefault();dropZone.classList.add('drag');}));
+['dragleave','drop'].forEach(ev=>dropZone.addEventListener(ev,e=>{e.preventDefault();dropZone.classList.remove('drag');}));
+dropZone.addEventListener('drop',e=>{const f=e.dataTransfer.files&&e.dataTransfer.files[0];if(f)loadFile(f);});
 
-['dragenter','dragover'].forEach(ev => {
-  dropZone.addEventListener(ev, e => {
-    e.preventDefault();
-    dropZone.classList.add('drag');
-  });
-});
-
-['dragleave','drop'].forEach(ev => {
-  dropZone.addEventListener(ev, e => {
-    e.preventDefault();
-    dropZone.classList.remove('drag');
-  });
-});
-
-dropZone.addEventListener('drop', e => {
-  const f = e.dataTransfer.files && e.dataTransfer.files[0];
-  if (f) loadFile(f);
-});
-
-function password(){
-  return $('adminPassword').value;
-}
-
-function pill(id, text, on){
-  const el = $(id);
-  el.textContent = text;
-  el.className = 'pill' + (on ? ' on' : '');
-}
-
-function setAdminStatus(text, good){
-  $('adminStatus').textContent = text;
-  $('adminStatus').className = 'small ' + (good ? 'good' : 'bad');
-}
+function password(){return document.getElementById('adminPassword').value;}
+function setAdminStatus(text,good){const el=document.getElementById('adminStatus');el.textContent=text;el.className='hint '+(good?'good':'bad');}
 
 function checkAdmin(){
-  const pw = password();
-  if (!pw) {
-    setAdminStatus('ê´€ë¦¬ì ë¹„ë°€ë²ˆí˜¸ë¥¼ ì…ë ¥í•˜ì„¸ìš”.', false);
-    return;
-  }
-
-  setAdminStatus('ì—°ê²° í™•ì¸ ì¤‘...', true);
-
+  const pw=password();
+  if(!pw){setAdminStatus('ê´€ë¦¬ì ë¹„ë°€ë²ˆí˜¸ë¥¼ ì…ë ¥í•˜ì„¸ìš”.',false);return;}
+  setAdminStatus('í™•ì¸ ì¤‘...',true);
   google.script.run
-    .withSuccessHandler(cfg => {
-      adminVerified = true;
-      githubReady = !!cfg.github.tokenConfigured;
-
-      setAdminStatus('ê´€ë¦¬ì ì¸ì¦ ì™„ë£Œ', true);
-      pill('sheetPill', cfg.spreadsheetName + ' ì—°ê²°', true);
-      pill('adminPill', 'ê´€ë¦¬ì ì¸ì¦ ì™„ë£Œ', true);
-      pill('githubPill', githubReady ? 'GitHub ì¤€ë¹„ ì™„ë£Œ' : 'GitHub Token í•„ìš”', githubReady);
-
-      $('githubSection').style.display = '';
-      $('archiveSection').style.display = '';
-      $('repoText').textContent = cfg.github.owner + '/' + cfg.github.repo;
-      $('branchText').textContent = cfg.github.branch;
-      $('pagesText').textContent = cfg.github.pagesBase;
-
-      $('tokenSetup').style.display = githubReady ? 'none' : '';
-      $('tokenOk').style.display = githubReady ? '' : 'none';
-
-      renderArchive((cfg.recent || []));
+    .withSuccessHandler(r=>{
+      adminVerified=true;
+      setAdminStatus('âœ“ ê´€ë¦¬ì ì¸ì¦ ì™„ë£Œ Â· '+(r.spreadsheetName||'Google Sheet DB ì—°ê²°'),true);
       refreshButtons();
     })
-    .withFailureHandler(err => {
-      adminVerified = false;
-      githubReady = false;
-      setAdminStatus(err.message || String(err), false);
-      pill('adminPill', 'ê´€ë¦¬ì ì¸ì¦ ì‹¤íŒ¨', false);
+    .withFailureHandler(err=>{
+      adminVerified=false;
+      setAdminStatus(err.message||String(err),false);
       refreshButtons();
     })
     .getAdminConfig(pw);
 }
 
-function saveToken(){
-  const token = $('githubToken').value.trim();
-  if (!token) return;
+function validYmd(ymd){
+  if(!/^\d{8}$/.test(ymd))return false;
+  const y=+ymd.slice(0,4),m=+ymd.slice(4,6),d=+ymd.slice(6,8);
+  const dt=new Date(Date.UTC(y,m-1,d));
+  return dt.getUTCFullYear()===y&&dt.getUTCMonth()===m-1&&dt.getUTCDate()===d;
+}
+function isoDate(ymd){return ymd.slice(0,4)+'-'+ymd.slice(4,6)+'-'+ymd.slice(6,8);}
 
-  google.script.run
-    .withSuccessHandler(() => {
-      githubReady = true;
-      $('githubToken').value = '';
-      $('tokenSetup').style.display = 'none';
-      $('tokenOk').style.display = '';
-      pill('githubPill', 'GitHub ì¤€ë¹„ ì™„ë£Œ', true);
-      refreshButtons();
-    })
-    .withFailureHandler(err => {
-      alert(err.message || String(err));
-    })
-    .saveGithubTokenFromAdmin(password(), token);
+function classifyName(name){
+  let m=/^freight_(\d{8})\.html$/i.exec(name);
+  if(m&&validYmd(m[1]))return{reportType:'daily',date:isoDate(m[1]),title:'ìš´ì„ Â· ë²™ì»¤ ë°ì¼ë¦¬'};
+
+  m=/^freight_bunker_dashboard_(\d{4}-\d{2}-\d{2})(?:_[A-Za-z0-9_-]+)?\.html$/i.exec(name);
+  if(m)return{reportType:'daily',date:m[1],title:'ìš´ì„ Â· ë²™ì»¤ ë°ì¼ë¦¬'};
+
+  return null;
+}
+
+function showMeta(meta,format){
+  const badge='<span class="badge daily">ë°ì¼ë¦¬ ë¦¬í¬íŠ¸</span>';
+  document.getElementById('fileMeta').innerHTML=
+    '<div class="k">ìœ í˜•</div><div class="v">'+badge+'</div>'+ 
+    '<div class="k">ê¸°ì¤€ì¼</div><div class="v">'+esc(meta.date)+'</div>'+ 
+    '<div class="k">ì œëª‰</div><div class="v">'+esc(meta.title)+'</div>'+ 
+    '<div class="k">HTML í˜•ì‹</div><div class="v">'+esc(format)+'</div>'+ 
+    '<div class="k">íŒŒì¼ëª… ê·œì¹™</div><div class="v good">âœ“ ì •ìƒ</div>';
+  document.getElementById('fileMeta').style.display='grid';
+}
+
+function clearSelection(message){
+  selectedFile=null;selectedHtml='';selectedMeta=null;
+  document.getElementById('fileMeta').style.display='none';
+  document.getElementById('fileStatus').innerHTML='<span class="bad">'+esc(message)+'</span>';
+  refreshButtons();
 }
 
 function loadFile(file){
-  selectedFile = null;
-  selectedHtml = '';
-  selectedDate = '';
-  $('validationBadges').innerHTML = '';
-  $('fileNameText').textContent = file.name || '';
+  selectedFile=null;selectedHtml='';selectedMeta=null;
+  document.getElementById('previewCard').style.display='none';
+  document.getElementById('resultCard').style.display='none';
+  document.getElementById('fileMeta').style.display='none';
 
-  const name = file.name || '';
-  let m = /^freight_(\d{4})(\d{2})(\d{2})\.html$/i.exec(name);
-  let parsedDate = '';
-
-  if (m) {
-    parsedDate = m[1] + '-' + m[2] + '-' + m[3];
-  } else {
-    m = /^freight_bunker_dashboard_(\d{4}-\d{2}-\d{2})(?:_[A-Za-z0-9_-]+)?\.html$/i.exec(name);
-    if (m) parsedDate = m[1];
-  }
-
-  if (!parsedDate) {
-    $('fileStatus').innerHTML =
-      '<span class="bad">íŒŒì¼ëª… ì˜¤ë¥˜ Â· freight_YYYYMMDD.html í˜•ì‹ì„ ì‚¬ìš©í•´ ì£¼ì„¸ìš”. ì˜ˆ: freight_20260925.html</span>';
-    refreshButtons();
+  const name=file.name||'';
+  document.getElementById('fileNameText').textContent=name;
+  const meta=classifyName(name);
+  if(!meta){
+    clearSelection('íŒŒì¼ëª… ì˜¤ë¥˜ Â· freight_YYYYMMDD.html í˜•ì‹ í•„ìš”');
     return;
   }
 
-  const reader = new FileReader();
+  const reader=new FileReader();
+  reader.onload=()=>{
+    const html=String(reader.result||'');
+    if(!html.trim()){clearSelection('HTML íŒŒì¼ ë‚´ìš©ì´ ë¹„ì–´ ìˆìŠµë‹ˆë‹¤.');return;}
 
-  reader.onload = () => {
-    const html = String(reader.result || '');
-
-    if (!/<html\b/i.test(html) || !/<body\b/i.test(html)) {
-      $('fileStatus').innerHTML =
-        '<span class="bad">ë…ë¦½í˜• HTML êµ¬ì¡°ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŒ</span>';
-      refreshButtons();
+    if(!/(<!doctype\s+html|<html[\s>])/i.test(html)||!/<body[\s>]/i.test(html)){
+      clearSelection('ë…ë¦½í˜• HTMLì— <html>ê³¼ <body>ê°€ ìˆì–´ì•¼ í•©ë‹ˆë‹¤.');
       return;
     }
 
-    selectedFile = file;
-    selectedHtml = html;
-    selectedDate = parsedDate;
+    const hasRaw=/<script\b(?=[^>]*\bid\s*=\s*["']rawData["'])/i.test(html);
+    const hasCmt=/<script\b(?=[^>]*\bid\s*=\s*[\"']cmtData[\"'])/i.test(html);
+    const format=(hasRaw?'rawData ê°ì§€':'rawData ë¯¸ê°ì§€')+' Â· '+
+\ĞÛ]ÉØÛ]]H:¬$;)à	Î‰ØÛ]]H:ëî:¬$;)à	ÊJÉÈ0­È:ãázé¯{f%HS;&ä:ìî;( ;'©IÎÂ‚ˆÙ[XİYš[OYš[NÜÙ[XİY[Z[ÜÙ[XİYY]O[Y]NÂˆÚİÓY]JY]K›Ü›X]
+NÂˆØİ[Y[™Ù][[Y[RY
+	Ùš[Tİ]\ÉÊKš[›™\’SIÏÜ[ˆÛ\ÜÏH™ÛÛÙ¸§$È;'n;"çH;&a:èã0­È;( ;'©H;) :îa;&a:èãÜÜ[‰ÎÂˆ™Yœ™\Ú]ÛœÊ
+NÂˆNÂˆ™XY\‹›Û™\œ›ÜJ
+OO˜ÛX\”Ù[Xİ[ÛŠ	ûc#;'o;'a;'o{)à:ê®ûe¢;"­zââ:âé‰ÊNÂˆ™XY\‹œ™XY\Õ^
+š[K	ÕU‹N	ÊNÂŸB‚™[˜İ[Ûˆ™Yœ™\Ú]ÛœÊ
+^ÂˆÛÛœİš[SÚÏHH\Ù[XİYš[I‰ˆH\Ù[XİY[	‰ˆH\Ù[XİYY]NÂˆØİ[Y[™Ù][[Y[RY
+	Ü™]šY]Ğ‰ÊK™\ØX›YHYš[SÚÎÂˆØİ[Y[™Ù][[Y[RY
+	ÜØ]™P‰ÊK™\ØX›YHJš[SÚÉ‰˜YZ[•™\šYšYY
+NÂŸB‚™[˜İ[Ûˆ™]šY]Ñš[J
+^ÂˆYŠ\Ù[XİY[
+\™]\›ÂˆØİ[Y[™Ù][[Y[RY
+	Ü™]šY]ĞØ\™	ÊKœİ[K™\Ü^OIÉÎÂˆØİ[Y[™Ù][[Y[RY
+	Ü™]šY]Ñœ˜[YIÊKœÜ˜ÙØÏ\Ù[XİY[ÂˆØİ[Y[™Ù][[Y[RY
+	Ü™]šY]ĞØ\™	ÊKœØÜ›Û[ÕšY]ÊØ™Z]š[Ü‰ÜÛ[Ûİ	Ë›ØÚÎ‰Üİ\	ßJNÂŸB‚™[˜İ[ÛˆØ]™Qš[J
+^ÂˆYŠ\Ù[XİYš[_\Ù[XİY[\Ù[XİYY]J\™]\›ÂˆYŠXYZ[•™\šYšYY
+^Ø[\
+	ú­ :é«;'¤;'n;)§{'a:ê/;( ;&a:èã;em;(ï;!.;&¥‰ÊNÜ™]\›ßB‚ˆÛÛœİYØİ[Y[™Ù][[Y[RY
+	ÜØ]™P‰ÊNÂˆ‹™\ØX›Y]YNØ‹^ÛÛ[IÑÛÛÙÛHÚY];( ;'©H;)$K‹‹‰ÎÂ‚ˆÛÛÙÛKœØÜš\œ[‚ˆÚ]İXØÙ\ÜÒ[™\ŠOÂˆ‹^ÛÛ[IÑÛÛÙÛHÚY];( ;'©IÎÜ™Yœ™\Ú]ÛœÊ
+NÂˆ]]Z[IÏİ›Û™Ï¸§$È;( ;'©H;&a:èãÜİ›Û™Ïœ‰ÊÈˆ	ú®,;) ;'oˆ	ÊÙ\ØÊ‹™]JJÉÏœ‰ÊÈˆ	û,¦:é«ˆ	ÊÊ‹›İ™\Üš][Éú®,;(m:ãæ{'o:é«;cë;b®:¬,{"è	Î‰û"è:­ç;( ;'©IÊJÉÏœ‰ÊÈˆ	û&ä:ìîSˆ	ÊÊ‹›ÜšYÚ[˜[[Ø]™YÉúìí;(m;&a:èã	Î‰û( ;'©H;fe{'n;ea;&¥	ÊJÂˆ
+‹™Ú]X”X›\ÚYÉÏœ»-g;"è:é«;cë;b®ˆ:ì&;& H;&a:èã	Î‰ÉÊNÂˆYŠ‹™Ú]X•\›
+^Âˆ]Z[
+ÏIÏœH™YH‰ÊÙ\ØĞ]Š‹™Ú]X•\›
+JÉÈˆ\™Ù]H—Ø›[šÈˆ™[H››ÛÜ[™\ˆºé«;cë;b®;%í:®,8¡¥ÏØO‰ÎÂˆBˆYŠ‹Ø\›š[™ÜÉ‰œ‹Ø\›š[™ÜË›[™İ
+^Âˆ]Z[
+ÏIÏœÜ[ˆÛ\ÜÏHØ\›ˆº¬ ;)§H;,.:¬èˆ	ÊÙ\ØÊ‹Ø\›š[™ÜËš›Ú[Š	ÈÈ	ÊJJÉÏÜÜ[‰ÎÂˆBˆØİ[Y[™Ù][[Y[RY
+	Ü™\İ[Ø\™	ÊKœİ[K™\Ü^OIÉÎÂˆØİ[Y[™Ù][[Y[RY
+	Ü™\İ[›Ş	ÊKš[›™\’SY]Z[ÂˆØİ[Y[™Ù][[Y[RY
+	Ü™\İ[Ø\™	ÊKœØÜ›Û[ÕšY]ÊØ™Z]š[Ü‰ÜÛ[Ûİ	Ë›ØÚÎ‰Üİ\	ßJNÂˆJBˆÚ]˜Z[\™R[™\Š\œOÂˆ‹^ÛÛ[IÑÛÛÙÛHÚY];( ;'©IÎÜ™Yœ™\Ú]ÛœÊ
+NÂˆ]\ÙÏY\œ‰‰™\œ‹›Y\ÜØYÙOÙ\œ‹›Y\ÜØYÙN”İš[™Ê\œŠNÂˆYŠÑÚ]XˆÚÙ[‹ÚK\İ
+\ÙÊJ[\ÙÏIúì';e¢H;!);(%{'m;&a:èã:ä&;)à;%b»%f;"­zââ:âéˆ\ÈØÜš\;!);(%{'a;fe{'n;em;(ï;!.;&¥‰ÎÂˆ[\
+\ÙÊNÂˆJBˆœØ]™R[œ›ÛPYZ[ŠÂˆYZ[”\ÜİÛÜ™œ\ÜİÛÜ™
 
-    const badges = [];
-    badges.push('<span class="badge ok">HTML êµ¬ì¡° ì •ìƒ</span>');
-
-    if (/id\s*=\s*["']rawData["']/i.test(html)) {
-      badges.push('<span class="badge ok">rawData</span>');
-    } else {
-      badges.push('<span class="badge warn">rawData ë¯¸ê°ì§€</span>');
-    }
-
-    if (/id\s*=\s*["']cmtData["']/i.test(html)) {
-      badges.push('<span class="badge ok">cmtData</span>');
-    } else {
-      badges.push('<span class="badge warn">cmtData ë¯¸ê°ì§€</span>');
-    }
-
-    const remote =
-      /<script\b[^>]*\bsrc\s*=\s*["']https?:\/\//i.test(html) ||
-      /<link\b[^>]*\bhref\s*=\s*["']https?:\/\//i.test(html) ||
-      /@import\s+(?:url\()?["']?https?:\/\//i.test(html);
-
-    badges.push(
-      remote
-        ? '<span class="badge warn">ì™¸ë¶€ ì˜ì¡´ì„± ê°ì§€ Â· ì„œë²„ ê²€ì¦ í•„ìš”</span>'
-        : '<span class="badge ok">ì™¸ë¶€ CDN ì—†ìŒ</span>'
-    );
-
-    $('validationBadges').innerHTML = badges.join('');
-    $('fileStatus').innerHTML =
-      '<span class="good"><strong>ì¸ì‹ ì™„ë£Œ</strong></span> Â· ê¸°ì¤€ì¼ ' +
-      esc(selectedDate) + ' Â· ' + Number(file.size || 0).toLocaleString('ko-KR') + ' bytes';
-
-    refreshButtons();
-  };
-
-  reader.onerror = () => {
-    $('fileStatus').innerHTML = '<span class="bad">íŒŒì¼ì„ ì½ì§€ ëª»í–ˆìŠµë‹ˆë‹¤.</span>';
-    refreshButtons();
-  };
-
-  reader.readAsText(file, 'UTF-8');
-}
-
-function refreshButtons(){
-  const fileOk = !!selectedFile && !!selectedHtml;
-  $('previewBtn').disabled = !fileOk;
-  $('sheetSaveBtn').disabled = !(fileOk && adminVerified);
-  $('publishBtn').disabled = !(fileOk && adminVerified && githubReady);
-}
-
-function previewFile(){
-  if (!selectedHtml) return;
-  $('previewSection').style.display = '';
-  $('previewFrame').srcdoc = selectedHtml;
-  $('previewSection').scrollIntoView({behavior:'smooth',block:'start'});
-}
-
-function saveFile(publishToGithub){
-  if (!selectedFile || !selectedHtml || !adminVerified) return;
-  if (publishToGithub && !githubReady) {
-    alert('GitHub Token ì—°ê²°ì´ í•„ìš”í•©ë‹ˆë‹¤.');
-    return;
-  }
-
-  const btn = publishToGithub ? $('publishBtn') : $('sheetSaveBtn');
-  const original = btn.textContent;
-  btn.disabled = true;
-  btn.textContent = publishToGithub ? 'ì €ì¥Â·ë°œí–‰ ì¤‘...' : 'ì €ì¥ ì¤‘...';
-
-  google.script.run
-    .withSuccessHandler(r => {
-      btn.textContent = original;
-      refreshButtons();
-
-      $('resultSection').style.display = '';
-
-      const warnings = (r.warnings || []).length
-        ? '<br><span style="color:#8A5A00">ê²€ì¦ ì°¸ê³ : ' +
-          esc((r.warnings || []).join(' / ')) + '</span>'
-        : '';
-
-      const link = r.githubUrl
-        ? '<br><a href="' + escAttr(r.githubUrl) + '" target="_blank">ë°œí–‰ í˜ì´ì§€ ì—´ê¸° â†—</a>'
-        : '';
-
-      $('resultBox').innerHTML =
-        '<strong>' + (r.overwritten ? 'ê¸°ì¡´ ê¸°ì¤€ì¼ ì—…ë°ì´íŠ¸' : 'ì‹ ê·œ ì €ì¥') + ' ì™„ë£Œ</strong><br>' +
-        'ê¸°ì¤€ì¼: ' + esc(r.date) + '<br>' +
-        'ì›ë³¸ HTML: ' + Number(r.htmlChars || 0).toLocaleString('ko-KR') + 'ì Â· ' +
-        Number(r.htmlChunks || 0).toLocaleString('ko-KR') + 'ê°œ ì²­í¬<br>' +
-        'ì €ì¥: Google Sheet DAILY_HTML' +
-        (r.githubPublished ? '<br>GitHub: ' + esc(r.githubPath) : '') +
-        warnings + link;
-
-      $('resultSection').scrollIntoView({behavior:'smooth',block:'start'});
-      loadArchive();
-    })
-    .withFailureHandler(err => {
-      btn.textContent = original;
-      refreshButtons();
-      alert(err.message || String(err));
-    })
-    .saveHtmlFromAdmin({
-      adminPassword: password(),
-      fileName: selectedFile.name,
-      htmlText: selectedHtml,
-      publishToGithub: !!publishToGithub
-    });
-}
-
-function loadArchive(){
-  if (!adminVerified) return;
-
-  google.script.run
-    .withSuccessHandler(r => renderArchive((r && r.reports) || []))
-    .withFailureHandler(err => {
-      $('archiveBody').innerHTML =
-        '<tr><td colspan="6" class="bad">' + esc(err.message || String(err)) + '</td></tr>';
-    })
-    .getRecentReportsFromAdmin(password(), 40);
-}
-
-function renderArchive(rows){
-  const body = $('archiveBody');
-
-  if (!rows.length) {
-    body.innerHTML = '<tr><td colspan="6" class="small">ì €ì¥ëœ HTML ì—†ìŒ</td></tr>';
-    return;
-  }
-
-  body.innerHTML = rows.map(r => {
-    const open = r.viewUrl
-      ? '<button class="ghost" onclick="window.open(\'' + jsq(r.viewUrl) + '\',\'_blank\')">ì—´ê¸°</button>'
-      : '';
-
-    return '<tr>' +
-      '<td class="num"><strong>' + esc(r.date) + '</strong></td>' +
-      '<td>' + esc(r.title || '') + '</td>' +
-      '<td>' + esc(r.status || '') + '</td>' +
-      '<td class="num">' + Number(r.htmlChars || 0).toLocaleString('ko-KR') + '</td>' +
-      '<td class="num">' + esc(r.updatedAt || '') + '</td>' +
-      '<td><div class="actions">' +
-        open +
-        '<button class="secondary" onclick="downloadStored(\'' + jsq(r.date) + '\')">HTML ì €ì¥</button>' +
-      '</div></td>' +
-    '</tr>';
-  }).join('');
-}
-
-function downloadStored(date){
-  google.script.run
-    .withSuccessHandler(r => {
-      const blob = new Blob([r.htmlText], {type:'text/html;charset=utf-8'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = r.fileName || ('freight_' + date.replace(/-/g,'') + '.html');
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-    })
-    .withFailureHandler(err => alert(err.message || String(err)))
-    .getStoredHtmlFromAdmin(password(), date);
-}
-
-function esc(v){
-  return String(v ?? '').replace(/[&<>"']/g, c => ({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-  }[c]));
-}
-
-function escAttr(v){ return esc(v); }
-
-function jsq(v){
-  return String(v ?? '')
-    .replace(/\\/g,'\\\\')
-    .replace(/'/g,"\\'")
-    .replace(/\r?\n/g,' ');
-}
-</script>
-</body>
-</html>
+Kˆš[S˜[YNœÙ[XİYš[K›˜[YKˆ[^œÙ[XİY[ˆX›\ÚÑÚ]XYBˆJNÂŸB‚™[˜İ[Ûˆ\ØÊŠ^Ü™]\›ˆİš[™ÊÏÉÉÊKœ™\XÙJÖÉˆ‰×KÙËÏOŠÉÉ‰Î‰É˜[\ÉË	Ï	Î‰É›ÉË	Ï‰Î‰É™İÉË	È‰Î‰Éœ][İÉË‰È‰ÉˆÌÎNÉßVØ×JJNßB™[˜İ[Ûˆ\ØĞ]ŠŠ^Ü™]\›ˆ\ØÊŠNßBÜØÜš\‚Ø›ÙO‚Ú[‚
