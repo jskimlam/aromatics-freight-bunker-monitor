@@ -236,7 +236,7 @@ a{color:var(--blue)}
           <div class="kicker">HTML PACKAGE</div>
           <h2>독립형 대시보드 선택</h2>
         </div>
-        <div class="small">파일명 기준일과 HTML 내부 rawData 기준일 자동 대조</div>
+        <div class="small">파일명 기준일과 HTML 내부 rawData 기준일 자동 대조 · 예: freight_20260925.html</div>
       </div>
 
       <label class="upload" id="dropZone">
@@ -246,7 +246,7 @@ a{color:var(--blue)}
           <div class="filename" id="fileNameText">HTML 파일 선택</div>
           <div class="small" style="margin-top:5px">
             클릭하거나 파일을 여기에 놓기<br>
-            <strong>freight_bunker_dashboard_YYYY-MM-DD.html</strong>
+            <strong>freight_YYYYMMDD.html</strong>
           </div>
         </div>
       </label>
@@ -436,10 +436,20 @@ function loadFile(file){
   $('validationBadges').innerHTML = '';
   $('fileNameText').textContent = file.name || '';
 
-  const m = /^freight_bunker_dashboard_(\d{4}-\d{2}-\d{2})(?:_[A-Za-z0-9_-]+)?\.html$/i.exec(file.name || '');
-  if (!m) {
+  const name = file.name || '';
+  let m = /^freight_(\d{4})(\d{2})(\d{2})\.html$/i.exec(name);
+  let parsedDate = '';
+
+  if (m) {
+    parsedDate = m[1] + '-' + m[2] + '-' + m[3];
+  } else {
+    m = /^freight_bunker_dashboard_(\d{4}-\d{2}-\d{2})(?:_[A-Za-z0-9_-]+)?\.html$/i.exec(name);
+    if (m) parsedDate = m[1];
+  }
+
+  if (!parsedDate) {
     $('fileStatus').innerHTML =
-      '<span class="bad">파일명 오류 · freight_bunker_dashboard_YYYY-MM-DD.html 형식 필요</span>';
+      '<span class="bad">파일명 오류 · freight_YYYYMMDD.html 형식을 사용해 주세요. 예: freight_20260925.html</span>';
     refreshButtons();
     return;
   }
@@ -458,7 +468,7 @@ function loadFile(file){
 
     selectedFile = file;
     selectedHtml = html;
-    selectedDate = m[1];
+    selectedDate = parsedDate;
 
     const badges = [];
     badges.push('<span class="badge ok">HTML 구조 정상</span>');
@@ -615,7 +625,7 @@ function downloadStored(date){
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = r.fileName || ('freight_bunker_dashboard_' + date + '.html');
+      a.download = r.fileName || ('freight_' + date.replace(/-/g,'') + '.html');
       document.body.appendChild(a);
       a.click();
       a.remove();
