@@ -1,1 +1,82 @@
-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="refresh" content="0; url=./latest.html"><title>F/B LAM</title><script>location.replace('./latest.html');</script></head><body><a href="./latest.html">F/B LAM 최신 리포트 열기</a></body></html>
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0B2A6B">
+<title>F/B LAM · Freight & Bunker Monitor</title>
+<style>
+:root{
+  --navy:#0B2A6B;--navy2:#163A86;--gold:#C9A227;--ink:#0F172A;
+  --muted:#64748B;--line:#E2E8F0;--tint:#F6F8FB;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:#fff;color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+body{min-height:100vh;background:linear-gradient(180deg,#071B46 0,#0B2A6B 43%,#F6F8FB 43%,#F6F8FB 100%)}
+.wrap{width:min(860px,calc(100% - 32px));margin:0 auto;padding:56px 0 36px}
+.hero{display:flex;align-items:center;gap:18px;color:#fff;margin-bottom:28px}
+.logo{width:86px;height:86px;border-radius:22px;object-fit:cover;border:1px solid rgba(255,255,255,.28);
+  box-shadow:0 12px 28px rgba(0,0,0,.2)}
+.eyebrow{font-size:11px;letter-spacing:.16em;color:#BAC8E8;font-weight:700}
+h1{margin:4px 0 6px;font-size:clamp(26px,4vw,40px);letter-spacing:-.02em}
+.sub{color:#D8E1F4;font-size:14px}
+.panel{background:#fff;border:1px solid var(--line);border-radius:18px;padding:24px;box-shadow:0 18px 48px rgba(15,23,42,.14)}
+.panel h2{margin:0 0 6px;font-size:18px;color:var(--navy)}
+.panel p{margin:0;color:var(--muted);font-size:13.5px;line-height:1.7}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px}
+.action{display:block;text-decoration:none;border-radius:14px;padding:20px;border:1px solid var(--line);
+  transition:.15s ease;background:#fff;color:var(--ink)}
+.action:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(15,23,42,.08)}
+.action.primary{background:var(--navy);color:#fff;border-color:var(--navy)}
+.action.admin{background:#FFF9E8;border-color:#E7D58E}
+.k{font-size:11px;font-weight:800;letter-spacing:.12em;color:var(--gold)}
+.action.admin .k{color:#8A6B00}
+.t{font-size:18px;font-weight:800;margin-top:5px}
+.d{font-size:12.5px;line-height:1.6;margin-top:5px;color:#64748B}
+.action.primary .d{color:#C9D5EE}
+.badge{display:inline-block;margin-top:16px;padding:5px 10px;border-radius:999px;background:var(--tint);
+  color:var(--navy);font-size:11.5px;font-weight:700}
+.foot{margin-top:14px;text-align:center;color:#94A3B8;font-size:11px}
+@media(max-width:640px){
+  .wrap{padding-top:30px}.hero{align-items:flex-start}.logo{width:68px;height:68px;border-radius:18px}
+  .grid{grid-template-columns:1fr}.panel{padding:18px}
+}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div class="hero">
+    <img class="logo" src="./assets/fb_lam_app_icon.jpg" alt="F/B LAM">
+    <div>
+      <div class="eyebrow">AROMATICS FREIGHT & BUNKER MONITOR</div>
+      <h1>F/B LAM</h1>
+      <div class="sub">운임 · 벙커 데일리 모니터링 포털</div>
+    </div>
+  </div>
+
+  <section class="panel">
+    <h2>운임·벙커 데일리</h2>
+    <p>최신 리포트 확인과 관리자 업로드를 이 화면에서 바로 선택하는 구조.</p>
+
+    <div class="grid">
+      <a class="action primary" href="./latest.html">
+        <div class="k">DAILY REPORT</div>
+        <div class="t">최신 리포트 보기</div>
+        <div class="d">최근 발행된 운임·벙커 HTML 대시보드 열기</div>
+      </a>
+
+      <a class="action admin" href="https://script.google.com/macros/s/AKfycbzxIuEZty6WF4wplS9ZJK1rie3Mmjrcb7rwQ-QoCJJepRdQuTlkpsv2IOkvSbdfeXEF/exec?page=admin">
+        <div class="k">ADMIN</div>
+        <div class="t">관리자 · HTML 업로드</div>
+        <div class="d">비밀번호 로그인 후 Sheet 저장 및 GitHub 발행</div>
+      </a>
+    </div>
+
+    <span class="badge">관리자 버튼은 Google Apps Script 관리자 콘솔로 연결</span>
+  </section>
+
+  <div class="foot">F/B LAM · Lotte Advanced Materials</div>
+</main>
+</body>
+</html>
