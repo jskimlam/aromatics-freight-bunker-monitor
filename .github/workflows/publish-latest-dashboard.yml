@@ -92,7 +92,7 @@ jobs:
           .brand b{{color:#f3c934}}
           .eyebrow{{font-size:11px;letter-spacing:.14em;color:#b8cce7;margin-top:4px}}
           .hero-row{{display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap}}
-          .latest-btn{{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;background:#fff;color:#0b2e63;border-radius:9px;padding:10px 14px;font-size:12px;font-weight:800}}
+          .hero-actions{{display:flex;gap:8px;flex-wrap:wrap}}\n          .latest-btn,.admin-btn{{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;border-radius:9px;padding:10px 14px;font-size:12px;font-weight:800}}\n          .latest-btn{{background:#fff;color:#0b2e63}}\n          .admin-btn{{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.45)}}
           main{{padding:20px 16px 34px}}
           .head{{display:flex;align-items:end;justify-content:space-between;gap:12px;margin-bottom:12px}}
           h1{{font-size:20px;margin:0;color:#0b2e63}}
@@ -118,7 +118,10 @@ jobs:
                 <div class="brand">F/B <b>LAM</b></div>
                 <div class="eyebrow">AROMATICS FREIGHT &amp; BUNKER MONITOR</div>
               </div>
-              <a class="latest-btn" href="latest.html">최신 리포트 바로 열기</a>
+              <div class="hero-actions">
+                <a class="latest-btn" href="latest.html">최신 리포트 바로 열기</a>
+                <a class="admin-btn" href="https://script.google.com/macros/s/AKfycbzc08bNohxOAV_iE8x8YZ7v1sOn7tyIID3xK2eoXR6vlrZOIxHBn66-sZGoKDiyF5lH/exec?page=admin">관리자 모드</a>
+              </div>
             </div>
           </header>
           <main class="wrap">
