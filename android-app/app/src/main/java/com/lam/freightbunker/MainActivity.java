@@ -44,6 +44,7 @@ public class MainActivity extends Activity {
     private Button adminButton;
     private ValueCallback<Uri[]> filePathCallback;
     private boolean adminMode = false;
+    private boolean publicFallbackUsed = false;
     private String pendingHtml = "";
 
     @Override
@@ -162,9 +163,34 @@ public class MainActivity extends Activity {
 
             @Override
             public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-                if (!adminMode) {
-                    offline.setVisibility(View.VISIBLE);
+                if (adminMode) return;
+
+                if (!publicFallbackUsed &&
+                        failingUrl != null &&
+                        failingUrl.startsWith(PUBLIC_REPORT_URL)) {
+
+                    publicFallbackUsed = true;
+                    String cached = readCache();
+
+                    if (cached != null && !cached.trim().isEmpty()) {
+                        Toast.makeText(
+                                MainActivity.this,
+                                "GitHub 연결 실패 · 앱 저장 리포트 표시",
+                                Toast.LENGTH_SHORT
+                        ).show();
+
+                        webView.loadDataWithBaseURL(
+                                PUBLIC_REPORT_URL,
+                                cached,
+                                "text/html",
+                                "UTF-8",
+                                null
+                        );
+                        return;
+                    }
                 }
+
+                offline.setVisibility(View.VISIBLE);
             }
         });
 
@@ -184,19 +210,25 @@ public class MainActivity extends Activity {
         adminMode = false;
         adminButton.setText("HTML 업로드");
         offline.setVisibility(View.GONE);
+        publicFallbackUsed = false;
 
-        String cached = readCache();
-        if (cached != null && !cached.trim().isEmpty()) {
+        // 방금 APK에서 선택한 HTML이 있으면 그 파일을 즉시 표시.
+        // 이후 앱 재실행/일반 새로고침에서는 GitHub latest.html을 우선 조회.
+        if (pendingHtml != null && !pendingHtml.trim().isEmpty()) {
+            String localHtml = pendingHtml;
+            pendingHtml = "";
             webView.loadDataWithBaseURL(
                     PUBLIC_REPORT_URL,
-                    cached,
+                    localHtml,
                     "text/html",
                     "UTF-8",
                     null
             );
-        } else {
-            webView.loadUrl(PUBLIC_REPORT_URL);
+            return;
         }
+
+        // GitHub 최신 리포트를 우선 표시하고 쿼리스트링으로 WebView 캐시 우회.
+        webView.loadUrl(PUBLIC_REPORT_URL + "?v=" + System.currentTimeMillis());
     }
 
     private String readUriText(Uri uri) {
