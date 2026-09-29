@@ -158,9 +158,6 @@ public class MainActivity extends Activity {
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
                 offline.setVisibility(View.GONE);
-                if (adminMode) {
-                    injectSheetOnlySave();
-                }
             }
 
             @Override
@@ -200,45 +197,6 @@ public class MainActivity extends Activity {
         } else {
             webView.loadUrl(PUBLIC_REPORT_URL);
         }
-    }
-
-    private void injectSheetOnlySave() {
-        String js =
-                "(function(){" +
-                "try{" +
-                "var sub=document.querySelector('header .sub');" +
-                "if(sub)sub.textContent='APK 업로드: Google Sheet 저장 후 앱 화면에 즉시 반영됩니다.';" +
-                "var warn=document.querySelector('.rules .warn');" +
-                "if(warn)warn.textContent='선택한 HTML 원본을 그대로 Google Sheet에 저장하며 GitHub 발행 설정은 사용하지 않습니다.';" +
-                "window.saveFile=function(){" +
-                "if(!selectedFile||!selectedHtml||!selectedMeta)return;" +
-                "if(!adminVerified){alert('관리자 인증을 먼저 완료해 주세요.');return;}" +
-                "var btn=document.getElementById('saveBtn');" +
-                "btn.disabled=true;btn.textContent='저장 중...';" +
-                "google.script.run" +
-                ".withSuccessHandler(function(r){" +
-                "btn.textContent='Google Sheet 저장';refreshButtons();" +
-                "var detail='<strong>✓ 저장 완료</strong><br>기준일: '+esc(r.date)+'<br>처리: '+(r.overwritten?'기존 동일 리포트 갱신':'신규 저장')+'<br>원본 HTML: '+(r.originalHtmlSaved?'보존 완료':'저장 확인 필요')+'<br>앱 화면: 반영 완료';" +
-                "if(r.warnings&&r.warnings.length){detail+='<br><span class=\"warn\">검증 참고: '+esc(r.warnings.join(' / '))+'</span>';}" +
-                "document.getElementById('resultCard').style.display='';" +
-                "document.getElementById('resultBox').innerHTML=detail;" +
-                "if(window.FBApp&&FBApp.onSaved){FBApp.onSaved(String(r.date||''));}" +
-                "})" +
-                ".withFailureHandler(function(err){" +
-                "btn.textContent='Google Sheet 저장';refreshButtons();" +
-                "alert(err&&err.message?err.message:String(err));" +
-                "})" +
-                ".saveHtmlFromAdmin({" +
-                "adminPassword:password()," +
-                "fileName:selectedFile.name," +
-                "htmlText:selectedHtml," +
-                "publishToGithub:false" +
-                "});" +
-                "};" +
-                "}catch(e){console.error(e);}" +
-                "})();";
-
-        webView.evaluateJavascript(js, null);
     }
 
     private String readUriText(Uri uri) {
@@ -334,6 +292,31 @@ public class MainActivity extends Activity {
 
             if (results != null && results.length > 0 && results[0] != null) {
                 pendingHtml = readUriText(results[0]);
+
+                if (pendingHtml != null &&
+                        pendingHtml.toLowerCase().contains("<html") &&
+                        pendingHtml.toLowerCase().contains("<body")) {
+
+                    // 선택 즉시 앱의 최신 리포트 캐시에도 저장.
+                    // Apps Script 저장 성공 콜백과 무관하게 대시보드 버튼으로 돌아오면 바로 표시됨.
+                    writeCache(pendingHtml);
+
+                    Toast.makeText(
+                            MainActivity.this,
+                            "HTML 선택 완료 · 앱 표시용 리포트 반영",
+                            Toast.LENGTH_SHORT
+                    ).show();
+
+                } else {
+                    pendingHtml = "";
+
+                    Toast.makeText(
+                            MainActivity.this,
+                            "유효한 HTML 파일을 읽지 못했습니다.",
+                            Toast.LENGTH_LONG
+                    ).show();
+                }
+
             } else {
                 pendingHtml = "";
             }
