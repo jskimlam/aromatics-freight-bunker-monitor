@@ -131,71 +131,7 @@ jobs:
             <aside class="panel wti-panel" id="wtiPanel"><div class="panel-head"><div><h2>WTI 2W Trend</h2><p>최근 14일 · 실제 평가일 기준</p></div><span class="pill">2W</span></div><div class="wti-kpis"><div><span>최신</span><strong id="wtiLatest">–</strong><em id="wtiDate">–</em></div><div><span>전회 대비</span><strong id="wtiChange" class="flat">–</strong><em id="wtiPrevDate">–</em></div><div><span>2주 범위</span><strong id="wtiRange">–</strong><em>최저–최고</em></div></div><div class="wti-chart" id="wtiChart"><div class="wti-empty">WTI 데이터 불러오는 중</div></div><div class="wti-foot">대시보드 내 WTI 평가값 자동 반영 · 미평가일 제외</div></aside>
           </div></main>
           <footer><div class="wrap">Aromatics Freight Monitor · S&amp;P Global Platts 기반 운임·벙커 리서치 플랫폼</div></footer>
-          <script>(function(){{function el(id){{return document.getElementById(id);}}function md(d){{return d.slice(5).replace('-','/');}}function fail(msg){{var h=el('wtiChart');if(h)h.innerHTML='<div class="wti-empty">'+msg+'</div>';}}fetch('latest.html?ts='+Date.now(),{{cache:'no-store'}}).then(function(r){{if(!r.ok)throw new Error('load');return r.text();}}).then(function(html){{var doc=new DOMParser().parseFromString(html,'text/html');var node=doc.getElementById('rawData');if(!node)throw new Error('raw');var raw=JSON.parse(node.textContent||'{{}}');var s=(raw.c||[]).find(function(x){{return x.sym==='NMCL001';}});if(!s||!raw.d||!raw.d.length)throw new Error('series');var lastMs=Date.parse(raw.d[raw.d.length-1]+'T00:00:00Z');var cutoff=lastMs-13*86400000;var pts=[];raw.d.forEach(function(d,i){{var v=s.v[i];if(v!=null&&Date.parse(d+'T00:00:00Z')>=cutoff)pts.push({{d:d,v:Number(v)}});}});if(!pts.length)throw new Error('empty');var latest=pts[pts.length-1],prev=pts.length>1?pts[pts.length-2]:null;var chg=prev?latest.v-prev.v:null,pct=prev&&prev.v?chg/prev.v*100:null;var vals=pts.map(function(p){{return p.v;}});var lo=Math.min.apply(null,vals),hi=Math.max.apply(null,vals);el('wtiLatest').innerHTML='
-
-          Path('index.html').write_text(index, encoding='utf-8')
-
-      - name: Commit latest dashboard and premium landing
-        run: |
-          if git diff --quiet -- latest.html index.html; then
-            echo "No publish change."
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add latest.html index.html
-          git commit -m "Publish latest dashboard and refresh premium landing"
-          git pull --rebase origin main
-          git push origin main
-+latest.v.toFixed(2)+'<small>/b</small>';el('wtiDate').textContent=latest.d;el('wtiRange').textContent='
-
-          Path('index.html').write_text(index, encoding='utf-8')
-
-      - name: Commit latest dashboard and premium landing
-        run: |
-          if git diff --quiet -- latest.html index.html; then
-            echo "No publish change."
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add latest.html index.html
-          git commit -m "Publish latest dashboard and refresh premium landing"
-          git pull --rebase origin main
-          git push origin main
-+lo.toFixed(2)+'–
-
-          Path('index.html').write_text(index, encoding='utf-8')
-
-      - name: Commit latest dashboard and premium landing
-        run: |
-          if git diff --quiet -- latest.html index.html; then
-            echo "No publish change."
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add latest.html index.html
-          git commit -m "Publish latest dashboard and refresh premium landing"
-          git pull --rebase origin main
-          git push origin main
-+hi.toFixed(2);var ch=el('wtiChange');if(chg==null){{ch.textContent='전회 대비 없음';ch.className='flat';el('wtiPrevDate').textContent='–';}}else{{ch.textContent=(chg>0?'+':'')+chg.toFixed(2)+' ('+(pct>=0?'+':'')+pct.toFixed(2)+'%)';ch.className=chg>0?'up':chg<0?'down':'flat';el('wtiPrevDate').textContent=prev.d+' 대비';}}var W=520,H=230,L=18,R=18,T=18,B=34;var t0=Date.parse(pts[0].d+'T00:00:00Z'),t1=Date.parse(latest.d+'T00:00:00Z');var span=Math.max(t1-t0,1),vr=Math.max(hi-lo,1),ymin=lo-vr*.08,ymax=hi+vr*.08;function xp(d){{return L+(Date.parse(d+'T00:00:00Z')-t0)/span*(W-L-R);}}function yp(v){{return T+(ymax-v)/(ymax-ymin)*(H-T-B);}}var coords=pts.map(function(p){{return xp(p.d).toFixed(1)+','+yp(p.v).toFixed(1);}}).join(' ');var grid=[0,.25,.5,.75,1].map(function(q){{var y=(T+q*(H-T-B)).toFixed(1);return '<line x1="'+L+'" y1="'+y+'" x2="'+(W-R)+'" y2="'+y+'"/>';}}).join('');var circles=pts.map(function(p,i){{var last=i===pts.length-1;return '<circle cx="'+xp(p.d).toFixed(1)+'" cy="'+yp(p.v).toFixed(1)+'" r="'+(last?'4.2':'2.7')+'" class="'+(last?'last':'')+'"><title>'+p.d+' · 
-
-          Path('index.html').write_text(index, encoding='utf-8')
-
-      - name: Commit latest dashboard and premium landing
-        run: |
-          if git diff --quiet -- latest.html index.html; then
-            echo "No publish change."
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add latest.html index.html
-          git commit -m "Publish latest dashboard and refresh premium landing"
-          git pull --rebase origin main
-          git push origin main
-+p.v.toFixed(2)+'/b</title></circle>';}}).join('');el('wtiChart').innerHTML='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="WTI 최근 2주 가격 추이"><g class="grid">'+grid+'</g><polyline class="line" points="'+coords+'"/><g class="points">'+circles+'</g><text x="'+L+'" y="'+(H-8)+'" text-anchor="start">'+md(pts[0].d)+'</text><text x="'+(W-R)+'" y="'+(H-8)+'" text-anchor="end">'+md(latest.d)+'</text></svg>';}}).catch(function(){{fail('WTI 데이터 로드 실패');}});}})();</script>
+          <script>(function(){{function el(id){{return document.getElementById(id);}}function md(d){{return d.slice(5).replace('-','/');}}function fail(msg){{var h=el('wtiChart');if(h)h.innerHTML='<div class="wti-empty">'+msg+'</div>';}}fetch('latest.html?ts='+Date.now(),{{cache:'no-store'}}).then(function(r){{if(!r.ok)throw new Error('load');return r.text();}}).then(function(html){{var doc=new DOMParser().parseFromString(html,'text/html');var node=doc.getElementById('rawData');if(!node)throw new Error('raw');var raw=JSON.parse(node.textContent||'{{}}');var s=(raw.c||[]).find(function(x){{return x.sym==='NMCL001';}});if(!s||!raw.d||!raw.d.length)throw new Error('series');var lastMs=Date.parse(raw.d[raw.d.length-1]+'T00:00:00Z');var cutoff=lastMs-13*86400000;var pts=[];raw.d.forEach(function(d,i){{var v=s.v[i];if(v!=null&&Date.parse(d+'T00:00:00Z')>=cutoff)pts.push({{d:d,v:Number(v)}});}});if(!pts.length)throw new Error('empty');var latest=pts[pts.length-1],prev=pts.length>1?pts[pts.length-2]:null;var chg=prev?latest.v-prev.v:null,pct=prev&&prev.v?chg/prev.v*100:null;var vals=pts.map(function(p){{return p.v;}});var lo=Math.min.apply(null,vals),hi=Math.max.apply(null,vals);el('wtiLatest').innerHTML='$'+latest.v.toFixed(2)+'<small>/b</small>';el('wtiDate').textContent=latest.d;el('wtiRange').textContent='$'+lo.toFixed(2)+'–$'+hi.toFixed(2);var ch=el('wtiChange');if(chg==null){{ch.textContent='전회 대비 없음';ch.className='flat';el('wtiPrevDate').textContent='–';}}else{{ch.textContent=(chg>0?'+':'')+chg.toFixed(2)+' ('+(pct>=0?'+':'')+pct.toFixed(2)+'%)';ch.className=chg>0?'up':chg<0?'down':'flat';el('wtiPrevDate').textContent=prev.d+' 대비';}}var W=520,H=230,L=18,R=18,T=18,B=34;var t0=Date.parse(pts[0].d+'T00:00:00Z'),t1=Date.parse(latest.d+'T00:00:00Z');var span=Math.max(t1-t0,1),vr=Math.max(hi-lo,1),ymin=lo-vr*.08,ymax=hi+vr*.08;function xp(d){{return L+(Date.parse(d+'T00:00:00Z')-t0)/span*(W-L-R);}}function yp(v){{return T+(ymax-v)/(ymax-ymin)*(H-T-B);}}var coords=pts.map(function(p){{return xp(p.d).toFixed(1)+','+yp(p.v).toFixed(1);}}).join(' ');var grid=[0,.25,.5,.75,1].map(function(q){{var y=(T+q*(H-T-B)).toFixed(1);return '<line x1="'+L+'" y1="'+y+'" x2="'+(W-R)+'" y2="'+y+'"/>';}}).join('');var circles=pts.map(function(p,i){{var last=i===pts.length-1;return '<circle cx="'+xp(p.d).toFixed(1)+'" cy="'+yp(p.v).toFixed(1)+'" r="'+(last?'4.2':'2.7')+'" class="'+(last?'last':'')+'"><title>'+p.d+' · $'+p.v.toFixed(2)+'/b</title></circle>';}}).join('');el('wtiChart').innerHTML='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="WTI 최근 2주 가격 추이"><g class="grid">'+grid+'</g><polyline class="line" points="'+coords+'"/><g class="points">'+circles+'</g><text x="'+L+'" y="'+(H-8)+'" text-anchor="start">'+md(pts[0].d)+'</text><text x="'+(W-R)+'" y="'+(H-8)+'" text-anchor="end">'+md(latest.d)+'</text></svg>';}}).catch(function(){{fail('WTI 데이터 로드 실패');}});}})();</script>
           </body></html>'''
 
           Path('index.html').write_text(index, encoding='utf-8')
