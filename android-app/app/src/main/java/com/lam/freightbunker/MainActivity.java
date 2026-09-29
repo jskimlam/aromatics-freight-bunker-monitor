@@ -93,9 +93,9 @@ public class MainActivity extends Activity {
         root.addView(offline, webParams);
 
         adminButton = new Button(this);
-        adminButton.setText("HTML 업로드");
+        adminButton.setText("관리자");
         adminButton.setTextColor(Color.WHITE);
-        adminButton.setTextSize(11);
+        adminButton.setTextSize(12);
         adminButton.setAllCaps(false);
         adminButton.setPadding(dp(12), 0, dp(12), 0);
 
@@ -114,10 +114,10 @@ public class MainActivity extends Activity {
 
         FrameLayout.LayoutParams adminParams = new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.WRAP_CONTENT,
-                dp(42)
+                dp(44)
         );
-        adminParams.gravity = Gravity.END | Gravity.BOTTOM;
-        adminParams.setMargins(dp(10), dp(10), dp(12), dp(14));
+        adminParams.gravity = Gravity.END | Gravity.TOP;
+        adminParams.setMargins(dp(10), dp(10), dp(12), 0);
         root.addView(adminButton, adminParams);
 
         dashboardButton = new Button(this);
@@ -178,6 +178,14 @@ public class MainActivity extends Activity {
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                String url = request.getUrl() == null ? "" : request.getUrl().toString();
+
+                if (url.startsWith(ADMIN_URL) ||
+                        (url.startsWith(SCRIPT_BASE) && url.contains("page=admin"))) {
+                    openAdmin();
+                    return true;
+                }
+
                 return false;
             }
 
@@ -235,7 +243,7 @@ public class MainActivity extends Activity {
 
     private void loadDashboard() {
         adminMode = false;
-        adminButton.setText("HTML 업로드");
+        adminButton.setText("관리자");
         adminButton.setVisibility(View.VISIBLE);
         dashboardButton.setVisibility(View.GONE);
         offline.setVisibility(View.GONE);
