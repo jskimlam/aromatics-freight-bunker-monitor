@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>아로마 케미칼 운임 · 벙커 대시보드</title>
+<title>Aromatics Freight Monitor · Daily Research Dashboard</title>
 <style>
 
 :root{
@@ -263,21 +263,74 @@ footer{margin:36px 0 42px;padding-top:13px;border-top:1px solid var(--line);font
   .mast,.sec,h3.grp,.ticker{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
 
+
+/* AFM premium research skin */
+.mast{position:relative;overflow:hidden;background:
+radial-gradient(circle at 13% 12%,rgba(240,207,118,.18),transparent 25%),
+radial-gradient(circle at 86% 8%,rgba(102,158,240,.20),transparent 27%),
+linear-gradient(135deg,#061633 0%,#0B2D63 52%,#174A96 100%)!important;
+border-bottom:1px solid rgba(255,255,255,.08)!important}
+.mast:after{content:"";position:absolute;inset:0;pointer-events:none;background-image:
+linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
+linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+background-size:32px 32px;mask-image:linear-gradient(to bottom,rgba(0,0,0,.45),transparent 90%)}
+.mast .wrap{position:relative;z-index:1}
+.premium-top{display:flex!important;align-items:flex-end!important;justify-content:space-between!important;gap:24px!important;padding-top:34px!important;padding-bottom:16px!important}
+.premium-brand{min-width:0}.brand-kicker{display:flex;align-items:center;gap:10px;font-size:10.5px;font-weight:900;letter-spacing:.18em;color:#C7D8EF}
+.brand-mark{display:inline-flex;align-items:center;justify-content:center;height:28px;min-width:55px;padding:0 13px;border-radius:999px;color:#F1CB67;background:rgba(255,255,255,.07);border:1px solid rgba(255,226,148,.32)}
+.mast h1{margin:7px 0 5px!important;font-size:clamp(28px,2.4vw + 16px,46px)!important;line-height:1!important;letter-spacing:-.045em!important}
+.premium-sub{font-size:13px;color:#D6E1EF;font-weight:650;letter-spacing:.02em;margin-bottom:7px}
+.premium-actions{display:flex;gap:9px;flex-wrap:wrap;justify-content:flex-end}
+.premium-actions button{border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.07);color:#fff;border-radius:999px;padding:10px 15px;font:inherit;font-size:12px;font-weight:800;cursor:pointer}
+.premium-actions .gold{background:linear-gradient(135deg,#F0CF76,#D9AD39);color:#082651;border-color:rgba(255,255,255,.4);box-shadow:0 9px 22px rgba(0,0,0,.16)}
+.premium-hero{display:grid!important;grid-template-columns:minmax(0,1.8fr) repeat(3,minmax(0,.72fr));gap:13px!important;padding-top:5px!important;padding-bottom:24px!important}
+.hero-card{border:1px solid rgba(255,255,255,.13);border-radius:18px;padding:17px;background:linear-gradient(180deg,rgba(255,255,255,.13),rgba(255,255,255,.05));box-shadow:0 16px 34px rgba(0,0,0,.11);backdrop-filter:blur(10px)}
+.hero-main{padding:20px}.hero-k{font-size:10px;font-weight:900;letter-spacing:.14em;color:#CBD9EB}.hero-title{margin-top:8px;font-size:clamp(18px,1vw + 14px,24px);font-weight:900;letter-spacing:-.03em;color:#FFF2CD;line-height:1.25}.hero-text{margin-top:10px;font-size:12.7px;line-height:1.7;color:#E5EDF7}.hero-v{margin-top:9px;font-size:clamp(22px,1vw + 17px,30px);font-weight:900;letter-spacing:-.035em;color:#fff}.hero-s{margin-top:6px;font-size:10.8px;color:#CBD8E8}
+.sec{border-radius:15px!important;padding:11px 15px!important;background:linear-gradient(90deg,#0B2D63,#123B7B 60%,#184B99)!important;box-shadow:0 12px 26px rgba(6,26,58,.08)!important}
+.card{border-radius:15px!important;box-shadow:0 14px 32px rgba(8,28,64,.06)!important}
+.kpi{border-radius:15px!important}
+@media(max-width:1000px){.premium-hero{grid-template-columns:1fr 1fr}.hero-main{grid-column:1/-1}}
+@media(max-width:600px){.premium-top{display:block!important;padding-top:20px!important;padding-bottom:12px!important}.premium-actions{margin-top:14px;justify-content:flex-start}.premium-actions button{flex:1 1 calc(50% - 5px)}.premium-hero{grid-template-columns:1fr;gap:9px!important;padding-bottom:15px!important}.hero-card,.hero-main{padding:13px;border-radius:14px}.brand-kicker{font-size:9px}.premium-sub{font-size:11.5px}}
+
 </style>
 </head>
 <body>
 
 <header class="mast">
-  <div class="wrap">
-    <div>
-      <div class="eyebrow">AROMATICS FREIGHT &amp; BUNKER MONITOR</div>
-      <h1>아로마 케미칼 운임 · 벙커 대시보드</h1>
+  <div class="wrap premium-top">
+    <div class="premium-brand">
+      <div class="brand-kicker"><span class="brand-mark">AFM</span>AROMATICS FREIGHT MONITOR</div>
+      <h1>Aromatics Freight Monitor</h1>
+      <div class="premium-sub">Chemical Freight · Bunker · Market Intelligence</div>
       <div class="meta" id="meta"></div>
     </div>
-    <div class="actions">
-      <button id="ldBtn" class="primary">데일리 업데이트</button>
-      <button id="saveBtn">업데이트된 HTML 저장</button>
-      <button onclick="window.print()">인쇄 / PDF</button>
+    <div class="premium-actions">
+      <button onclick="location.href='./'">리포트 목록</button>
+      <button class="gold" onclick="window.print()">인쇄 / PDF</button>
+      <button id="ldBtn" style="display:none">데일리 업데이트</button>
+      <button id="saveBtn" style="display:none">HTML 저장</button>
+    </div>
+  </div>
+  <div class="wrap premium-hero">
+    <div class="hero-card hero-main">
+      <div class="hero-k">LATEST MARKET BRIEF</div>
+      <div class="hero-title" id="heroTitle">북아시아 HSFO 데일리 브리핑</div>
+      <div class="hero-text" id="heroSummary">최신 코멘터리 요약</div>
+    </div>
+    <div class="hero-card">
+      <div class="hero-k">LATEST DATE</div>
+      <div class="hero-v" id="heroDate">—</div>
+      <div class="hero-s">최신 평가 기준일</div>
+    </div>
+    <div class="hero-card">
+      <div class="hero-k">TRACKED SERIES</div>
+      <div class="hero-v" id="heroCoverage">—</div>
+      <div class="hero-s">운임 · 벙커 · 원료</div>
+    </div>
+    <div class="hero-card">
+      <div class="hero-k">BRIEFING ARCHIVE</div>
+      <div class="hero-v" id="heroReports">—</div>
+      <div class="hero-s">누적 코멘터리</div>
     </div>
   </div>
 </header>
@@ -597,6 +650,15 @@ function renderAll() {
   const syms = Object.keys(DATA.series), lastD = RAW.d[RAW.d.length - 1];
   $('meta').innerHTML = '기준일 <b>' + lastD + '</b> &nbsp;·&nbsp; 이력 ' + RAW.d[0] + ' 이후 일별 &nbsp;·&nbsp; 지표 ' + syms.length + '개 &nbsp;·&nbsp; 단위 $/톤 (WTI $/bbl)';
   $('colOrder').textContent = RAW.c.map(c => metaOf(c.sym).short).join(' | ');
+  const latestCmt = CMT.length ? CMT.slice().sort((a,b)=>a.date < b.date ? 1 : -1)[0] : null;
+  const latestSecs = latestCmt ? briefSections(latestCmt) : {};
+  const latestView = latestCmt ? secGet(latestSecs, '코멘터리') : [];
+  const latestOutlook = latestCmt ? secGet(latestSecs, '결론및전망') : [];
+  if ($('heroDate')) $('heroDate').textContent = lastD;
+  if ($('heroCoverage')) $('heroCoverage').textContent = syms.length + '개';
+  if ($('heroReports')) $('heroReports').textContent = CMT.length + '건';
+  if ($('heroTitle')) $('heroTitle').textContent = latestCmt ? (latestCmt.title || '북아시아 HSFO 데일리 브리핑') : '북아시아 HSFO 데일리 브리핑';
+  if ($('heroSummary')) $('heroSummary').textContent = latestCmt ? [latestView[0] || (latestCmt.sum && latestCmt.sum[0]) || '최신 코멘터리 요약', latestOutlook[0] ? '전망: ' + latestOutlook[0] : ''].filter(Boolean).join('  ') : '저장된 브리핑 없음';
   const LIST = META.filter(m => has(m.sym)).concat(syms.filter(s => !META.some(m => m.sym === s)).map(s => ({g: '기타', sym: s, ko: DATA.series[s].name, short: DATA.series[s].name, freq: '–'})));
 
   // 티커
