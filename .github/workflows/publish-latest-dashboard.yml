@@ -1,0 +1,59 @@
+name: Publish latest freight dashboard
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'freight_*.html'
+      - 'freight_bunker_dashboard_*.html'
+
+permissions:
+  contents: write
+
+jobs:
+  publish-latest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select newest dated dashboard
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+          import shutil
+
+          candidates = []
+          for p in Path('.').glob('*.html'):
+              m = re.fullmatch(r'freight_(\d{8})\.html', p.name, re.I)
+              if m:
+                  ymd = m.group(1)
+                  candidates.append((ymd, p))
+                  continue
+
+              m = re.fullmatch(r'freight_bunker_dashboard_(\d{4})-(\d{2})-(\d{2})(?:_[A-Za-z0-9_-]+)?\.html', p.name, re.I)
+              if m:
+                  ymd = ''.join(m.groups())
+                  candidates.append((ymd, p))
+
+          if not candidates:
+              raise SystemExit('No dated freight dashboard HTML found.')
+
+          ymd, src = max(candidates, key=lambda x: x[0])
+          print(f'Publishing {src} ({ymd})')
+          shutil.copyfile(src, 'latest.html')
+          shutil.copyfile(src, 'index.html')
+
+      - name: Commit latest dashboard
+        run: |
+          if git diff --quiet -- latest.html index.html; then
+            echo "No latest dashboard change."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add latest.html index.html
+          git commit -m "Publish newest freight dashboard"
+          git push
