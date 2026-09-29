@@ -3,52 +3,27 @@ package com.lam.freightbunker;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.drawable.GradientDrawable;
-import android.net.Uri;
 import android.os.Bundle;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
-import android.webkit.JavascriptInterface;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
-import android.webkit.WebResourceRequest;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-
 public class MainActivity extends Activity {
-    private static final String SCRIPT_BASE =
-            "https://script.google.com/macros/s/AKfycbzc08bNohxOAV_iE8x8YZ7v1sOn7tyIID3xK2eoXR6vlrZOIxHBn66-sZGoKDiyF5lH/exec";
-    private static final String ADMIN_URL = SCRIPT_BASE + "?page=admin";
-    private static final String PUBLIC_HOME_URL =
+
+    private static final String HOME_URL =
             "https://jskimlam.github.io/aromatics-freight-bunker-monitor/";
-    private static final String PUBLIC_REPORT_URL =
-            "https://jskimlam.github.io/aromatics-freight-bunker-monitor/latest.html";
-    private static final String CACHE_FILE = "latest_freight_dashboard.html";
     private static final int FILE_CHOOSER_REQUEST = 1001;
 
     private WebView webView;
     private ProgressBar progressBar;
-    private TextView offline;
-    private Button adminButton;
-    private Button dashboardButton;
-    private ValueCallback<Uri[]> filePathCallback;
-    private boolean adminMode = false;
-    private boolean publicFallbackUsed = false;
-    private String pendingHtml = "";
+    private ValueCallback<android.net.Uri[]> filePathCallback;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,17 +34,26 @@ public class MainActivity extends Activity {
 
         webView = new WebView(this);
         webView.setBackgroundColor(Color.WHITE);
-        webView.getSettings().setJavaScriptEnabled(true);
-        webView.getSettings().setDomStorageEnabled(true);
-        webView.getSettings().setBuiltInZoomControls(false);
-        webView.getSettings().setDisplayZoomControls(false);
-        webView.getSettings().setLoadWithOverviewMode(true);
-        webView.getSettings().setUseWideViewPort(true);
-        webView.getSettings().setAllowFileAccess(true);
-        webView.getSettings().setAllowContentAccess(true);
-        webView.addJavascriptInterface(new AppBridge(), "FBApp");
 
-        progressBar = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
+        WebSettings settings = webView.getSettings();
+        settings.setJavaScriptEnabled(true);
+        settings.setDomStorageEnabled(true);
+        settings.setAllowFileAccess(true);
+        settings.setAllowContentAccess(true);
+        settings.setLoadWithOverviewMode(true);
+        settings.setUseWideViewPort(true);
+        settings.setBuiltInZoomControls(false);
+        settings.setDisplayZoomControls(false);
+
+        // 웹의 최신 내용을 항상 우선 사용.
+        // 앞으로 리포트 목록, 관리자 버튼, UI 수정은 GitHub / Apps Script만 바꾸면 됨.
+        settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+
+        progressBar = new ProgressBar(
+                this,
+                null,
+                android.R.attr.progressBarStyleHorizontal
+        );
         progressBar.setMax(100);
 
         FrameLayout.LayoutParams webParams = new FrameLayout.LayoutParams(
@@ -84,325 +68,113 @@ public class MainActivity extends Activity {
         );
         root.addView(progressBar, progressParams);
 
-        offline = new TextView(this);
-        offline.setText("데일리 리포트를 불러올 수 없습니다.\n네트워크 연결을 확인해 주세요.");
-        offline.setTextColor(Color.rgb(11, 42, 107));
-        offline.setTextSize(15);
-        offline.setGravity(Gravity.CENTER);
-        offline.setVisibility(View.GONE);
-        root.addView(offline, webParams);
-
-        adminButton = new Button(this);
-        adminButton.setText("관리자");
-        adminButton.setTextColor(Color.WHITE);
-        adminButton.setTextSize(12);
-        adminButton.setAllCaps(false);
-        adminButton.setPadding(dp(12), 0, dp(12), 0);
-
-        GradientDrawable bg = new GradientDrawable();
-        bg.setColor(Color.rgb(11, 46, 99));
-        bg.setCornerRadius(dp(12));
-        adminButton.setBackground(bg);
-        adminButton.setElevation(dp(5));
-        adminButton.setOnClickListener(v -> {
-            if (adminMode) {
-                loadDashboard();
-            } else {
-                openAdmin();
-            }
-        });
-
-        FrameLayout.LayoutParams adminParams = new FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.WRAP_CONTENT,
-                dp(44)
-        );
-        adminParams.gravity = Gravity.END | Gravity.TOP;
-        adminParams.setMargins(dp(10), dp(10), dp(12), 0);
-        root.addView(adminButton, adminParams);
-
-        dashboardButton = new Button(this);
-        dashboardButton.setText("← 대시보드로 돌아가기");
-        dashboardButton.setTextColor(Color.WHITE);
-        dashboardButton.setTextSize(12);
-        dashboardButton.setAllCaps(false);
-        dashboardButton.setPadding(dp(14), 0, dp(14), 0);
-        dashboardButton.setVisibility(View.GONE);
-
-        GradientDrawable dashboardBg = new GradientDrawable();
-        dashboardBg.setColor(Color.rgb(11, 46, 99));
-        dashboardBg.setCornerRadius(dp(10));
-        dashboardButton.setBackground(dashboardBg);
-        dashboardButton.setElevation(dp(8));
-        dashboardButton.setOnClickListener(v -> loadDashboard());
-
-        FrameLayout.LayoutParams dashboardParams = new FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.WRAP_CONTENT,
-                dp(44)
-        );
-        dashboardParams.gravity = Gravity.START | Gravity.TOP;
-        dashboardParams.setMargins(dp(12), dp(10), dp(12), 0);
-        root.addView(dashboardButton, dashboardParams);
-
         webView.setWebChromeClient(new WebChromeClient() {
             @Override
             public void onProgressChanged(WebView view, int newProgress) {
                 progressBar.setProgress(newProgress);
-                progressBar.setVisibility(newProgress >= 100 ? View.GONE : View.VISIBLE);
+                progressBar.setVisibility(
+                        newProgress >= 100 ? View.GONE : View.VISIBLE
+                );
             }
 
             @Override
             public boolean onShowFileChooser(
-                    WebView webView,
-                    ValueCallback<Uri[]> filePathCallbackNew,
+                    WebView view,
+                    ValueCallback<android.net.Uri[]> newCallback,
                     FileChooserParams fileChooserParams
             ) {
                 if (filePathCallback != null) {
                     filePathCallback.onReceiveValue(null);
                 }
-                filePathCallback = filePathCallbackNew;
+
+                filePathCallback = newCallback;
 
                 try {
                     Intent intent = fileChooserParams.createIntent();
                     intent.addCategory(Intent.CATEGORY_OPENABLE);
-                    intent.setType("*/*");
                     startActivityForResult(intent, FILE_CHOOSER_REQUEST);
                     return true;
+
                 } catch (Exception e) {
                     filePathCallback = null;
-                    Toast.makeText(MainActivity.this, "파일 선택창을 열 수 없습니다.", Toast.LENGTH_SHORT).show();
+
+                    Toast.makeText(
+                            MainActivity.this,
+                            "파일 선택창을 열 수 없습니다.",
+                            Toast.LENGTH_SHORT
+                    ).show();
+
                     return false;
                 }
             }
         });
 
-        webView.setWebViewClient(new WebViewClient() {
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                String url = request.getUrl() == null ? "" : request.getUrl().toString();
-
-                if (url.startsWith(ADMIN_URL) ||
-                        (url.startsWith(SCRIPT_BASE) && url.contains("page=admin"))) {
-                    openAdmin();
-                    return true;
-                }
-
-                return false;
-            }
-
-            @Override
-            public void onPageFinished(WebView view, String url) {
-                super.onPageFinished(view, url);
-                offline.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-                if (adminMode) return;
-
-                if (!publicFallbackUsed &&
-                        failingUrl != null &&
-                        (failingUrl.startsWith(PUBLIC_HOME_URL) || failingUrl.startsWith(PUBLIC_REPORT_URL))) {
-
-                    publicFallbackUsed = true;
-                    String cached = readCache();
-
-                    if (cached != null && !cached.trim().isEmpty()) {
-                        Toast.makeText(
-                                MainActivity.this,
-                                "GitHub 연결 실패 · 앱 저장 리포트 표시",
-                                Toast.LENGTH_SHORT
-                        ).show();
-
-                        webView.loadDataWithBaseURL(
-                                PUBLIC_REPORT_URL,
-                                cached,
-                                "text/html",
-                                "UTF-8",
-                                null
-                        );
-                        return;
-                    }
-                }
-
-                offline.setVisibility(View.VISIBLE);
-            }
-        });
+        webView.setWebViewClient(new WebViewClient());
 
         setContentView(root);
-        loadDashboard();
+        openHome();
     }
 
-    private void openAdmin() {
-        adminMode = true;
-        adminButton.setVisibility(View.GONE);
-        dashboardButton.setVisibility(View.VISIBLE);
-        offline.setVisibility(View.GONE);
-        pendingHtml = "";
-        webView.loadUrl(ADMIN_URL);
-    }
-
-    private void loadDashboard() {
-        adminMode = false;
-        adminButton.setText("관리자");
-        adminButton.setVisibility(View.VISIBLE);
-        dashboardButton.setVisibility(View.GONE);
-        offline.setVisibility(View.GONE);
-        publicFallbackUsed = false;
-
-        // 방금 APK에서 선택한 HTML이 있으면 그 파일을 즉시 표시.
-        // 이후 앱 재실행/일반 새로고침에서는 GitHub latest.html을 우선 조회.
-        if (pendingHtml != null && !pendingHtml.trim().isEmpty()) {
-            String localHtml = pendingHtml;
-            pendingHtml = "";
-            webView.loadDataWithBaseURL(
-                    PUBLIC_REPORT_URL,
-                    localHtml,
-                    "text/html",
-                    "UTF-8",
-                    null
-            );
-            return;
-        }
-
-        // 앱 첫 화면은 날짜별 리포트 목록. 쿼리스트링으로 WebView 캐시 우회.
-        webView.loadUrl(PUBLIC_HOME_URL + "?v=" + System.currentTimeMillis());
-    }
-
-    private String readUriText(Uri uri) {
-        try {
-            InputStream input = getContentResolver().openInputStream(uri);
-            if (input == null) return "";
-
-            BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(input, StandardCharsets.UTF_8)
-            );
-            StringBuilder sb = new StringBuilder();
-            char[] buffer = new char[8192];
-            int n;
-            while ((n = reader.read(buffer)) > 0) {
-                sb.append(buffer, 0, n);
-            }
-            reader.close();
-            input.close();
-            return sb.toString();
-
-        } catch (Exception e) {
-            return "";
-        }
-    }
-
-    private void writeCache(String html) {
-        if (html == null || html.trim().isEmpty()) return;
-
-        try {
-            File file = new File(getFilesDir(), CACHE_FILE);
-            FileOutputStream out = new FileOutputStream(file, false);
-            out.write(html.getBytes(StandardCharsets.UTF_8));
-            out.flush();
-            out.close();
-        } catch (Exception ignored) {
-        }
-    }
-
-    private String readCache() {
-        File file = new File(getFilesDir(), CACHE_FILE);
-        if (!file.exists()) return "";
-
-        try {
-            FileInputStream input = new FileInputStream(file);
-            InputStreamReader reader = new InputStreamReader(input, StandardCharsets.UTF_8);
-            StringBuilder sb = new StringBuilder();
-            char[] buffer = new char[8192];
-            int n;
-            while ((n = reader.read(buffer)) > 0) {
-                sb.append(buffer, 0, n);
-            }
-            reader.close();
-            input.close();
-            return sb.toString();
-
-        } catch (Exception e) {
-            return "";
-        }
-    }
-
-    public class AppBridge {
-        @JavascriptInterface
-        public void goDashboard() {
-            runOnUiThread(() -> loadDashboard());
-        }
-
-        @JavascriptInterface
-        public void onSaved(String date) {
-            runOnUiThread(() -> {
-                if (pendingHtml != null && !pendingHtml.trim().isEmpty()) {
-                    writeCache(pendingHtml);
-                    Toast.makeText(
-                            MainActivity.this,
-                            (date == null || date.isEmpty() ? "리포트" : date + " 리포트") + " 저장 완료",
-                            Toast.LENGTH_SHORT
-                    ).show();
-                    webView.postDelayed(() -> loadDashboard(), 500);
-                } else {
-                    Toast.makeText(
-                            MainActivity.this,
-                            "저장은 완료됐지만 앱 표시용 HTML 캐시를 만들지 못했습니다.",
-                            Toast.LENGTH_LONG
-                    ).show();
-                }
-            });
-        }
+    private void openHome() {
+        webView.loadUrl(
+                HOME_URL + "?v=" + System.currentTimeMillis()
+        );
     }
 
     private int dp(int value) {
-        float density = getResources().getDisplayMetrics().density;
+        float density =
+                getResources().getDisplayMetrics().density;
+
         return Math.round(value * density);
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(
+            int requestCode,
+            int resultCode,
+            Intent data
+    ) {
         if (requestCode == FILE_CHOOSER_REQUEST) {
-            Uri[] results = WebChromeClient.FileChooserParams.parseResult(resultCode, data);
 
-            if (results != null && results.length > 0 && results[0] != null) {
-                pendingHtml = readUriText(results[0]);
-
-                if (pendingHtml != null &&
-                        pendingHtml.toLowerCase().contains("<html") &&
-                        pendingHtml.toLowerCase().contains("<body")) {
-
-                    // 선택 즉시 앱의 최신 리포트 캐시에도 저장.
-                    // Apps Script 저장 성공 콜백과 무관하게 대시보드 버튼으로 돌아오면 바로 표시됨.
-                    writeCache(pendingHtml);
-
-                    Toast.makeText(
-                            MainActivity.this,
-                            "HTML 선택 완료 · 앱 표시용 리포트 반영",
-                            Toast.LENGTH_SHORT
-                    ).show();
-
-                } else {
-                    pendingHtml = "";
-
-                    Toast.makeText(
-                            MainActivity.this,
-                            "유효한 HTML 파일을 읽지 못했습니다.",
-                            Toast.LENGTH_LONG
-                    ).show();
-                }
-
-            } else {
-                pendingHtml = "";
-            }
+            android.net.Uri[] results =
+                    WebChromeClient.FileChooserParams.parseResult(
+                            resultCode,
+                            data
+                    );
 
             if (filePathCallback != null) {
                 filePathCallback.onReceiveValue(results);
                 filePathCallback = null;
             }
+
             return;
         }
 
-        super.onActivityResult(requestCode, resultCode, data);
+        super.onActivityResult(
+                requestCode,
+                resultCode,
+                data
+        );
+    }
+
+    @Override
+    public boolean onKeyDown(
+            int keyCode,
+            KeyEvent event
+    ) {
+        if (
+                keyCode == KeyEvent.KEYCODE_BACK &&
+                webView != null &&
+                webView.canGoBack()
+        ) {
+            webView.goBack();
+            return true;
+        }
+
+        return super.onKeyDown(
+                keyCode,
+                event
+        );
     }
 
     @Override
@@ -411,24 +183,11 @@ public class MainActivity extends Activity {
             filePathCallback.onReceiveValue(null);
             filePathCallback = null;
         }
+
         if (webView != null) {
             webView.destroy();
         }
-        super.onDestroy();
-    }
 
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (adminMode) {
-                loadDashboard();
-                return true;
-            }
-            if (webView.canGoBack()) {
-                webView.goBack();
-                return true;
-            }
-        }
-        return super.onKeyDown(keyCode, event);
+        super.onDestroy();
     }
 }
