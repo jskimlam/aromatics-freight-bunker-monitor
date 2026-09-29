@@ -20,7 +20,7 @@
  */
 
 const APP = {
-  VERSION: '1.0.0',
+  VERSION: '1.1.0',
   TZ: 'Asia/Seoul',
   HTML_CHUNK_SIZE: 40000,
 
@@ -614,9 +614,7 @@ function githubConfig_() {
 
 
 function buildGithubPath_(date) {
-  const y = date.slice(0, 4);
-  const m = date.slice(5, 7);
-  return 'reports/' + y + '/' + m + '/' + date + '/index.html';
+  return 'freight_' + String(date || '').replace(/-/g, '') + '.html';
 }
 
 
