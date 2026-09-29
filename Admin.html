@@ -34,7 +34,10 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#0f172a}
 </head>
 <body>
 <header><div class="wrap">
-  <h1>📤 F/B LAM 관리자</h1>
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+    <h1>📤 F/B LAM 관리자</h1>
+    <button type="button" onclick="goDashboard()" style="background:#fff;color:#0b2e63;border:1px solid rgba(255,255,255,.45)">← 대시보드</button>
+  </div>
   <div class="sub">데일리 원본 HTML을 Google Sheet에 저장합니다. GitHub 발행 설정 없이도 저장할 수 있습니다.</div>
 </div></header>
 
@@ -99,6 +102,16 @@ fileInput.addEventListener('change',e=>{if(e.target.files&&e.target.files[0])loa
 ['dragenter','dragover'].forEach(ev=>dropZone.addEventListener(ev,e=>{e.preventDefault();dropZone.classList.add('drag');}));
 ['dragleave','drop'].forEach(ev=>dropZone.addEventListener(ev,e=>{e.preventDefault();dropZone.classList.remove('drag');}));
 dropZone.addEventListener('drop',e=>{const f=e.dataTransfer.files&&e.dataTransfer.files[0];if(f)loadFile(f);});
+
+function goDashboard(){
+  try{
+    if(window.FBApp && typeof window.FBApp.goDashboard==='function'){
+      window.FBApp.goDashboard();
+      return;
+    }
+  }catch(e){}
+  window.location.href='https://jskimlam.github.io/aromatics-freight-bunker-monitor/';
+}
 
 function password(){return document.getElementById('adminPassword').value;}
 function setAdminStatus(text,good){const el=document.getElementById('adminStatus');el.textContent=text;el.className='hint '+(good?'good':'bad');}
