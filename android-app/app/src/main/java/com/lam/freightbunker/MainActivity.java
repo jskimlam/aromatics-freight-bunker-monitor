@@ -33,6 +33,8 @@ public class MainActivity extends Activity {
     private static final String SCRIPT_BASE =
             "https://script.google.com/macros/s/AKfycbzc08bNohxOAV_iE8x8YZ7v1sOn7tyIID3xK2eoXR6vlrZOIxHBn66-sZGoKDiyF5lH/exec";
     private static final String ADMIN_URL = SCRIPT_BASE + "?page=admin";
+    private static final String PUBLIC_HOME_URL =
+            "https://jskimlam.github.io/aromatics-freight-bunker-monitor/";
     private static final String PUBLIC_REPORT_URL =
             "https://jskimlam.github.io/aromatics-freight-bunker-monitor/latest.html";
     private static final String CACHE_FILE = "latest_freight_dashboard.html";
@@ -191,7 +193,7 @@ public class MainActivity extends Activity {
 
                 if (!publicFallbackUsed &&
                         failingUrl != null &&
-                        failingUrl.startsWith(PUBLIC_REPORT_URL)) {
+                        (failingUrl.startsWith(PUBLIC_HOME_URL) || failingUrl.startsWith(PUBLIC_REPORT_URL))) {
 
                     publicFallbackUsed = true;
                     String cached = readCache();
@@ -254,8 +256,8 @@ public class MainActivity extends Activity {
             return;
         }
 
-        // GitHub 최신 리포트를 우선 표시하고 쿼리스트링으로 WebView 캐시 우회.
-        webView.loadUrl(PUBLIC_REPORT_URL + "?v=" + System.currentTimeMillis());
+        // 앱 첫 화면은 날짜별 리포트 목록. 쿼리스트링으로 WebView 캐시 우회.
+        webView.loadUrl(PUBLIC_HOME_URL + "?v=" + System.currentTimeMillis());
     }
 
     private String readUriText(Uri uri) {
@@ -317,6 +319,11 @@ public class MainActivity extends Activity {
     }
 
     public class AppBridge {
+        @JavascriptInterface
+        public void goDashboard() {
+            runOnUiThread(() -> loadDashboard());
+        }
+
         @JavascriptInterface
         public void onSaved(String date) {
             runOnUiThread(() -> {
