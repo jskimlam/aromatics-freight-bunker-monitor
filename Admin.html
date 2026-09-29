@@ -26,7 +26,7 @@ label.upload.drag{background:#eff6ff;border-color:#2563eb}label.upload input{dis
 .badge{display:inline-block;padding:2px 8px;border-radius:999px;font-weight:800;font-size:10px}
 .badge.daily{background:#dbeafe;color:#1e40af}
 .preview{width:100%;height:520px;border:1px solid #cbd5e1;border-radius:9px;background:white}
-.result{background:#ecfdf5;border:1px solid #bbf7d0;border-radius:9px;padding:12px;font-size:12px;line-height:1.8}
+.result{background:#ecfdf5;border:1px solid #bbf7d0;border-radius:9px;padding:12px;font-size:12px;line-height:1.8}.result.error{background:#fff1f2;border-color:#fecdd3;color:#991b1b}
 .rules{font-size:11px;line-height:1.7;background:#f8fafc;border:1px solid #e2e8f0;border-radius:9px;padding:10px 12px;margin-bottom:12px;color:#475569}
 code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#0f172a}
 @media(max-width:640px){.preview{height:420px}.meta{grid-template-columns:85px 1fr}}
@@ -35,7 +35,7 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#0f172a}
 <body>
 <header><div class="wrap">
   <h1>📤 F/B LAM 관리자</h1>
-  <div class="sub">데일리 원본 HTML 전체를 저장합니다. HTML 원본은 그대로 보존되며 최신 리포트에도 함께 반영됩니다.</div>
+  <div class="sub">데일리 원본 HTML을 Google Sheet에 저장합니다. GitHub 발행 설정 없이도 저장할 수 있습니다.</div>
 </div></header>
 
 <main class="wrap">
@@ -207,9 +207,22 @@ function previewFile(){
   document.getElementById('previewCard').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
+function showResult(title,html,isError){
+  const card=document.getElementById('resultCard');
+  const box=document.getElementById('resultBox');
+  card.style.display='';
+  card.querySelector('h2').textContent=title;
+  box.className='result'+(isError?' error':'');
+  box.innerHTML=html;
+  card.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
 function saveFile(){
   if(!selectedFile||!selectedHtml||!selectedMeta)return;
-  if(!adminVerified){alert('관리자 인증을 먼저 완료해 주세요.');return;}
+  if(!adminVerified){
+    showResult('저장 확인','관리자 인증을 먼저 완료해 주세요.',true);
+    return;
+  }
 
   const btn=document.getElementById('saveBtn');
   btn.disabled=true;btn.textContent='Google Sheet 저장 중...';
@@ -220,29 +233,28 @@ function saveFile(){
       let detail='<strong>✓ 저장 완료</strong><br>'+
         '기준일: '+esc(r.date)+'<br>'+
         '처리: '+(r.overwritten?'기존 동일 리포트 갱신':'신규 저장')+'<br>'+
-        '원본 HTML: '+(r.originalHtmlSaved?'보존 완료':'저장 확인 필요')+
-        (r.githubPublished?'<br>최신 리포트: 반영 완료':'');
-      if(r.githubUrl){
-        detail+='<br><a href="'+escAttr(r.githubUrl)+'" target="_blank" rel="noopener">리포트 열기 ↗</a>';
-      }
+        '원본 HTML: '+(r.originalHtmlSaved?'보존 완료':'저장 확인 필요');
       if(r.warnings&&r.warnings.length){
         detail+='<br><span class="warn">검증 참고: '+esc(r.warnings.join(' / '))+'</span>';
       }
-      document.getElementById('resultCard').style.display='';
-      document.getElementById('resultBox').innerHTML=detail;
-      document.getElementById('resultCard').scrollIntoView({behavior:'smooth',block:'start'});
+      showResult('저장 완료',detail,false);
+
+      try{
+        if(window.FBApp&&typeof window.FBApp.onSaved==='function'){
+          window.FBApp.onSaved(String(r.date||''));
+        }
+      }catch(e){}
     })
     .withFailureHandler(err=>{
       btn.textContent='Google Sheet 저장';refreshButtons();
-      let msg=err&&err.message?err.message:String(err);
-      if(/GitHub Token/i.test(msg))msg='발행 설정이 완료되지 않았습니다. Apps Script 설정을 확인해 주세요.';
-      alert(msg);
+      const msg=err&&err.message?err.message:String(err);
+      showResult('저장 오류',esc(msg),true);
     })
     .saveHtmlFromAdmin({
       adminPassword:password(),
       fileName:selectedFile.name,
       htmlText:selectedHtml,
-      publishToGithub:true
+      publishToGithub:false
     });
 }
 
