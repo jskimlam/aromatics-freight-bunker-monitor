@@ -38,7 +38,7 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#0f172a}
     <h1>📤 F/B LAM 관리자</h1>
     <button type="button" onclick="goDashboard()" style="background:#fff;color:#0b2e63;border:1px solid rgba(255,255,255,.45)">← 대시보드</button>
   </div>
-  <div class="sub">데일리 원본 HTML을 Google Sheet에 저장합니다. GitHub 발행 설정 없이도 저장할 수 있습니다.</div>
+  <div class="sub">데일리 원본 HTML을 Google Sheet에 백업한 뒤 GitHub Pages 대시보드에 자동 발행합니다.</div>
 </div></header>
 
 <main class="wrap">
@@ -74,7 +74,7 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#0f172a}
 
     <div class="row" style="margin-top:12px">
       <button class="secondary" id="previewBtn" onclick="previewFile()" disabled>미리보기</button>
-      <button class="success" id="saveBtn" onclick="saveFile()" disabled>Google Sheet 저장</button>
+      <button class="success" id="saveBtn" onclick="saveFile()" disabled>저장 · 대시보드 발행</button>
     </div>
   </section>
 
@@ -238,19 +238,24 @@ function saveFile(){
   }
 
   const btn=document.getElementById('saveBtn');
-  btn.disabled=true;btn.textContent='Google Sheet 저장 중...';
+  btn.disabled=true;btn.textContent='저장 · 발행 중...';
 
   google.script.run
     .withSuccessHandler(r=>{
-      btn.textContent='Google Sheet 저장';refreshButtons();
-      let detail='<strong>✓ 저장 완료</strong><br>'+
+      btn.textContent='저장 · 대시보드 발행';refreshButtons();
+      let detail='<strong>✓ 저장 및 대시보드 발행 완료</strong><br>'+
         '기준일: '+esc(r.date)+'<br>'+
         '처리: '+(r.overwritten?'기존 동일 리포트 갱신':'신규 저장')+'<br>'+
-        '원본 HTML: '+(r.originalHtmlSaved?'보존 완료':'저장 확인 필요');
+        '원본 HTML: '+(r.originalHtmlSaved?'보존 완료':'저장 확인 필요')+'<br>'+
+        'GitHub 발행: '+(r.githubPublished?'완료':'미발행');
+      if(r.githubUrl){
+        detail+='<br><a href="'+escAttr(r.githubUrl)+'" target="_top" style="display:inline-flex;margin-top:10px;padding:9px 13px;border-radius:8px;background:#0b2e63;color:#fff;text-decoration:none;font-weight:800">업데이트된 대시보드 열기 →</a>';
+      }
+      detail+='<br><a href="https://jskimlam.github.io/aromatics-freight-bunker-monitor/" target="_top" style="display:inline-flex;margin-top:8px;padding:8px 12px;border-radius:8px;background:#e2e8f0;color:#0f172a;text-decoration:none;font-weight:800">메인 대시보드로 이동</a>';
       if(r.warnings&&r.warnings.length){
         detail+='<br><span class="warn">검증 참고: '+esc(r.warnings.join(' / '))+'</span>';
       }
-      showResult('저장 완료',detail,false);
+      showResult('저장 · 발행 완료',detail,false);
 
       try{
         if(window.FBApp&&typeof window.FBApp.onSaved==='function'){
@@ -259,7 +264,7 @@ function saveFile(){
       }catch(e){}
     })
     .withFailureHandler(err=>{
-      btn.textContent='Google Sheet 저장';refreshButtons();
+      btn.textContent='저장 · 대시보드 발행';refreshButtons();
       const msg=err&&err.message?err.message:String(err);
       showResult('저장 오류',esc(msg),true);
     })
@@ -267,7 +272,7 @@ function saveFile(){
       adminPassword:password(),
       fileName:selectedFile.name,
       htmlText:selectedHtml,
-      publishToGithub:false
+      publishToGithub:true
     });
 }
 
