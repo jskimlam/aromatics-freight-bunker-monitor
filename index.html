@@ -6,133 +6,45 @@
 <meta name="theme-color" content="#071a3a">
 <title>Aromatics Freight Monitor</title>
 <style>
-:root{
-  --navy:#071a3a;--navy2:#0b2d63;--navy3:#174a96;
-  --gold:#d9ad39;--gold2:#f0cf76;
-  --paper:#fff;--bg:#f3f6fb;--line:#dbe4ef;
-  --ink:#0f172a;--ink2:#566a82;--blue:#2b6ec8;
-  --shadow:0 18px 44px rgba(7,26,58,.09)
-}
-*{box-sizing:border-box}
-html,body{margin:0;background:linear-gradient(180deg,#f8fafc 0%,#f1f5f9 100%);color:var(--ink);
-font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic","Segoe UI",sans-serif}
-body{min-height:100vh}
-a{text-decoration:none;color:inherit}
-.wrap{max-width:1240px;margin:0 auto;padding:0 20px}
-.hero{position:relative;overflow:hidden;color:#fff;
-background:
-radial-gradient(circle at 14% 10%,rgba(240,207,118,.20),transparent 25%),
-radial-gradient(circle at 85% 10%,rgba(89,147,236,.22),transparent 26%),
-linear-gradient(135deg,#061633 0%,#0b2d63 52%,#174a96 100%);
-border-bottom:1px solid rgba(255,255,255,.08)}
-.hero:after{content:"";position:absolute;inset:0;pointer-events:none;
-background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
-background-size:32px 32px;mask-image:linear-gradient(to bottom,rgba(0,0,0,.45),transparent 88%)}
-.top{position:relative;z-index:1;display:flex;justify-content:space-between;gap:24px;align-items:flex-end;padding-top:34px}
-.brand-kicker{display:flex;align-items:center;gap:10px;font-size:11px;font-weight:850;letter-spacing:.20em;color:#c7d8ef}
-.mark{display:inline-flex;align-items:center;justify-content:center;height:29px;min-width:56px;padding:0 13px;border-radius:999px;
-color:#f3cd67;background:rgba(255,255,255,.07);border:1px solid rgba(255,226,148,.32);letter-spacing:.14em}
-h1{margin:8px 0 0;font-size:clamp(32px,4.2vw,58px);line-height:.98;letter-spacing:-.05em;font-weight:900}
-.subtitle{margin-top:12px;color:#d8e3f1;font-size:14px;font-weight:600;letter-spacing:.02em}.creator{display:inline-flex;align-items:center;gap:7px;margin-top:9px;padding:5px 9px;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.055);font-size:10px;font-weight:750;letter-spacing:.045em;color:#cbd8e8}.creator b{color:#f1cb67;letter-spacing:.10em}
-.actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
-.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 17px;border-radius:999px;
-font-size:12px;font-weight:850;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.07);color:#fff;backdrop-filter:blur(8px)}
-.btn.primary{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#082651;border-color:rgba(255,255,255,.42);box-shadow:0 10px 24px rgba(0,0,0,.18)}
-.hero-grid{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,1.75fr) repeat(3,minmax(0,.7fr));gap:14px;padding:26px 0 30px}
-.hero-card{border:1px solid rgba(255,255,255,.13);border-radius:20px;padding:18px 18px 16px;
-background:linear-gradient(180deg,rgba(255,255,255,.13),rgba(255,255,255,.055));box-shadow:0 16px 36px rgba(0,0,0,.12);backdrop-filter:blur(12px)}
-.hero-main{padding:22px}
-.k{font-size:10px;font-weight:900;letter-spacing:.15em;color:#cbd9eb}
-.hero-main .title{margin-top:8px;font-size:clamp(19px,2vw,27px);font-weight:900;letter-spacing:-.03em;color:#fff2cd;line-height:1.25}
-.hero-main .summary{margin-top:11px;max-width:760px;color:#e5edf7;font-size:13px;line-height:1.75}
-.hero-card .value{margin-top:10px;font-size:clamp(23px,2.2vw,31px);font-weight:900;letter-spacing:-.035em}
-.hero-card .small{margin-top:6px;color:#cbd8e8;font-size:11px;line-height:1.55}
-main{padding:26px 0 52px}
-.dashboard-grid{display:grid;grid-template-columns:minmax(0,1.38fr) minmax(320px,.62fr);gap:16px}
-.panel{background:var(--paper);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:20px;min-width:0}
-.panel-head{display:flex;justify-content:space-between;gap:16px;align-items:end;margin-bottom:16px}
-.panel-head h2{margin:0;font-size:22px;letter-spacing:-.03em;color:#102c51}
-.panel-head p{margin:5px 0 0;color:var(--ink2);font-size:12.5px}
-.pill{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:999px;background:#f8efd3;color:#7e5d0e;border:1px solid #eed991;font-size:10px;font-weight:900;letter-spacing:.05em}
-.latest{position:relative;overflow:hidden;border:1px solid #d9e3ef;border-radius:18px;padding:19px;background:linear-gradient(135deg,#fff 0%,#f8fbff 100%)}
-.latest:after{content:"";position:absolute;right:-40px;top:-40px;width:140px;height:140px;border-radius:50%;background:radial-gradient(circle,#eaf2ff 0%,transparent 70%)}
-.latest .date{font-size:12px;color:#66809e;font-weight:800}
-.latest h3{position:relative;z-index:1;margin:6px 0 0;font-size:21px;letter-spacing:-.025em;color:#102b50}
-.latest .desc{position:relative;z-index:1;margin-top:10px;color:#415a74;font-size:13px;line-height:1.7}
-.latest .open{position:relative;z-index:1;display:inline-flex;margin-top:15px;color:#1f5fbf;font-size:12px;font-weight:900}
-.archive{display:grid;gap:10px;margin-top:14px}
-.report{display:grid;grid-template-columns:96px 1fr auto;gap:14px;align-items:center;padding:13px 14px;border-radius:15px;border:1px solid var(--line);background:#fff;transition:.16s}
-.report:hover{transform:translateY(-1px);border-color:#aabed6;box-shadow:0 8px 20px rgba(7,26,58,.05)}
-.report-date{font-size:13px;color:#173e73;font-weight:900;font-variant-numeric:tabular-nums}
-.report-title{font-size:13px;font-weight:850;color:#1b3555}
-.report-file{margin-top:3px;color:#8190a3;font:10px ui-monospace,SFMono-Regular,Menlo,monospace}
-.arrow{width:31px;height:31px;border-radius:50%;display:grid;place-items:center;background:#f0f5fb;color:#1f5fbf;font-weight:900}
-.side-grid{display:grid;gap:12px}
-.info{padding:16px;border-radius:16px;border:1px solid var(--line);background:linear-gradient(180deg,#fff,#fbfcfe)}
-.info .name{font-size:11px;color:#6a7c92;font-weight:850;letter-spacing:.04em}
-.info .big{margin-top:7px;font-size:24px;font-weight:900;color:#102b4f;letter-spacing:-.03em}
-.info .note{margin-top:5px;font-size:11px;line-height:1.55;color:#7a899a}
-.workflow{margin-top:12px;padding:15px 16px;border-radius:16px;background:#0b2d63;color:#fff}
-.workflow b{display:block;font-size:12px;letter-spacing:.06em}
-.workflow p{margin:8px 0 0;color:#d7e2f0;font-size:11px;line-height:1.65}
-footer{padding:18px 0 30px;color:#8794a5;font-size:10.5px}
-@media(max-width:960px){.hero-grid{grid-template-columns:1fr 1fr}.hero-main{grid-column:1/-1}.dashboard-grid{grid-template-columns:1fr}}
-@media(max-width:620px){.wrap{padding:0 12px}.top{display:block;padding-top:22px}.actions{margin-top:16px;justify-content:flex-start}.hero-grid{grid-template-columns:1fr;gap:10px;padding-top:18px}.hero-card,.hero-main{padding:14px;border-radius:15px}.panel{padding:14px;border-radius:16px}.report{grid-template-columns:84px 1fr auto;gap:10px;padding:12px}.report-file{display:none}.btn{min-height:40px;padding:0 14px}.brand-kicker{font-size:9px}h1{font-size:34px}.subtitle{font-size:12px}}
+:root{--navy:#071a3a;--navy2:#0b2d63;--navy3:#174a96;--gold:#d9ad39;--gold2:#f0cf76;--paper:#fff;--bg:#f3f6fb;--line:#dbe4ef;--ink:#0f172a;--ink2:#566a82;--blue:#2b6ec8;--shadow:0 18px 44px rgba(7,26,58,.09)}
+*{box-sizing:border-box}html,body{margin:0;background:linear-gradient(180deg,#f8fafc 0%,#f1f5f9 100%);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic","Segoe UI",sans-serif}body{min-height:100vh}a{text-decoration:none;color:inherit}.wrap{max-width:1240px;margin:0 auto;padding:0 20px}
+.hero{position:relative;overflow:hidden;color:#fff;background:radial-gradient(circle at 14% 10%,rgba(240,207,118,.20),transparent 25%),radial-gradient(circle at 85% 10%,rgba(89,147,236,.22),transparent 26%),linear-gradient(135deg,#061633 0%,#0b2d63 52%,#174a96 100%);border-bottom:1px solid rgba(255,255,255,.08)}.hero:after{content:"";position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:32px 32px;mask-image:linear-gradient(to bottom,rgba(0,0,0,.45),transparent 88%)}
+.top{position:relative;z-index:1;display:flex;justify-content:space-between;gap:24px;align-items:flex-end;padding-top:34px}.brand-kicker{display:flex;align-items:center;gap:10px;font-size:11px;font-weight:850;letter-spacing:.20em;color:#c7d8ef}.mark{display:inline-flex;align-items:center;justify-content:center;height:29px;min-width:56px;padding:0 13px;border-radius:999px;color:#f3cd67;background:rgba(255,255,255,.07);border:1px solid rgba(255,226,148,.32);letter-spacing:.14em}h1{margin:8px 0 0;font-size:clamp(32px,4.2vw,58px);line-height:.98;letter-spacing:-.05em;font-weight:900}.subtitle{margin-top:12px;color:#d8e3f1;font-size:14px;font-weight:600;letter-spacing:.02em}.creator{display:inline-flex;align-items:center;gap:7px;margin-top:9px;padding:5px 9px;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.055);font-size:10px;font-weight:750;letter-spacing:.045em;color:#cbd8e8}.creator b{color:#f1cb67;letter-spacing:.10em}
+.actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 17px;border-radius:999px;font-size:12px;font-weight:850;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.07);color:#fff}.btn.primary{background:linear-gradient(135deg,#f0cf76,#d9ad39);color:#082651;border-color:rgba(255,255,255,.42);box-shadow:0 10px 24px rgba(0,0,0,.18)}
+.hero-grid{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,1.75fr) repeat(3,minmax(0,.7fr));gap:14px;padding:26px 0 30px}.hero-card{border:1px solid rgba(255,255,255,.13);border-radius:20px;padding:18px 18px 16px;background:linear-gradient(180deg,rgba(255,255,255,.13),rgba(255,255,255,.055));box-shadow:0 16px 36px rgba(0,0,0,.12)}.hero-main{padding:22px}.k{font-size:10px;font-weight:900;letter-spacing:.15em;color:#cbd9eb}.hero-main .title{margin-top:8px;font-size:clamp(19px,2vw,27px);font-weight:900;letter-spacing:-.03em;color:#fff2cd;line-height:1.25}.hero-main .summary{margin-top:11px;max-width:760px;color:#e5edf7;font-size:13px;line-height:1.75}.hero-card .value{margin-top:10px;font-size:clamp(23px,2.2vw,31px);font-weight:900;letter-spacing:-.035em}.hero-card .small{margin-top:6px;color:#cbd8e8;font-size:11px;line-height:1.55}
+main{padding:26px 0 52px}.dashboard-grid{display:grid;grid-template-columns:minmax(0,1.38fr) minmax(320px,.62fr);gap:16px}.panel{background:#fff;border:1px solid #dbe4ef;border-radius:20px;box-shadow:0 18px 44px rgba(7,26,58,.09);padding:20px;min-width:0}.panel-head{display:flex;justify-content:space-between;gap:16px;align-items:end;margin-bottom:16px}.panel-head h2{margin:0;font-size:22px;letter-spacing:-.03em;color:#102c51}.panel-head p{margin:5px 0 0;color:#566a82;font-size:12.5px}.pill{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:999px;background:#f8efd3;color:#7e5d0e;border:1px solid #eed991;font-size:10px;font-weight:900;letter-spacing:.05em}
+.latest{position:relative;overflow:hidden;border:1px solid #d9e3ef;border-radius:18px;padding:19px;background:linear-gradient(135deg,#fff 0%,#f8fbff 100%)}.latest:after{content:"";position:absolute;right:-40px;top:-40px;width:140px;height:140px;border-radius:50%;background:radial-gradient(circle,#eaf2ff 0%,transparent 70%)}.latest .date{font-size:12px;color:#66809e;font-weight:800}.latest h3{position:relative;z-index:1;margin:6px 0 0;font-size:21px;letter-spacing:-.025em;color:#102b50}.latest .desc{position:relative;z-index:1;margin-top:10px;color:#415a74;font-size:13px;line-height:1.7}.latest .open{position:relative;z-index:1;display:inline-flex;margin-top:15px;color:#1f5fbf;font-size:12px;font-weight:900}
+.archive{display:grid;gap:10px;margin-top:14px}.report{display:grid;grid-template-columns:96px 1fr auto;gap:14px;align-items:center;padding:13px 14px;border-radius:15px;border:1px solid #dbe4ef;background:#fff;transition:.16s}.report:hover{transform:translateY(-1px);border-color:#aabed6;box-shadow:0 8px 20px rgba(7,26,58,.05)}.report-date{font-size:13px;color:#173e73;font-weight:900;font-variant-numeric:tabular-nums}.report-title{font-size:13px;font-weight:850;color:#1b3555}.report-file{margin-top:3px;color:#8190a3;font:10px ui-monospace,SFMono-Regular,Menlo,monospace}.arrow{width:31px;height:31px;border-radius:50%;display:grid;place-items:center;background:#f0f5fb;color:#1f5fbf;font-weight:900}
+.side-grid{display:grid;gap:12px}.info{padding:16px;border-radius:16px;border:1px solid #dbe4ef;background:linear-gradient(180deg,#fff,#fbfcfe)}.info .name{font-size:11px;color:#6a7c92;font-weight:850;letter-spacing:.04em}.info .big{margin-top:7px;font-size:24px;font-weight:900;color:#102b4f;letter-spacing:-.03em}.info .note{margin-top:5px;font-size:11px;line-height:1.55;color:#7a899a}.workflow{margin-top:12px;padding:15px 16px;border-radius:16px;background:#0b2d63;color:#fff}.workflow b{display:block;font-size:12px;letter-spacing:.06em}.workflow p{margin:8px 0 0;color:#d7e2f0;font-size:11px;line-height:1.65}footer{padding:18px 0 30px;color:#8794a5;font-size:10.5px}
+@media(max-width:960px){.hero-grid{grid-template-columns:1fr 1fr}.hero-main{grid-column:1/-1}.dashboard-grid{grid-template-columns:1fr}}@media(max-width:620px){.wrap{padding:0 12px}.top{display:block;padding-top:22px}.actions{margin-top:16px;justify-content:flex-start}.hero-grid{grid-template-columns:1fr;gap:10px;padding-top:18px}.hero-card,.hero-main{padding:14px;border-radius:15px}.panel{padding:14px;border-radius:16px}.report{grid-template-columns:84px 1fr auto;gap:10px;padding:12px}.report-file{display:none}.btn{min-height:40px;padding:0 14px}.brand-kicker{font-size:9px}h1{font-size:34px}.subtitle{font-size:12px}}
 </style>
 </head>
 <body>
-<header class="hero">
-  <div class="wrap">
-    <div class="top">
-      <div>
-        <div class="brand-kicker"><span class="mark">AFM</span>AROMATICS FREIGHT MONITOR</div>
-        <h1>Freight & Bunker<br>Market Intelligence</h1>
-        <div class="subtitle">Chemical Freight · Bunker · Market Intelligence</div><div class="creator"><b>LAM</b><span>created by JS Kim</span></div>
-      </div>
-      <div class="actions">
-        <a class="btn primary" href="latest.html">최신 리포트 열기</a>
-        <a class="btn" href="https://script.google.com/macros/s/AKfycbzc08bNohxOAV_iE8x8YZ7v1sOn7tyIID3xK2eoXR6vlrZOIxHBn66-sZGoKDiyF5lH/exec?page=admin">관리자 모드</a>
-      </div>
-    </div>
-    <div class="hero-grid">
-      <section class="hero-card hero-main">
-        <div class="k">LATEST MARKET BRIEF</div>
-        <div class="title">북아시아 HSFO 종목 브리핑</div>
-        <div class="summary">Singapore 벤치마크 약세에도 Zhoushan과 Hong Kong의 프롬프트 재고 부족이 Delivered 프리미엄을 지지하는 국면. 최신 운임·벙커 리포트와 누적 시계열을 한 화면에서 확인.</div>
-      </section>
-      <section class="hero-card"><div class="k">LATEST DATE</div><div class="value">2026-09-28</div><div class="small">최신 평가 기준일</div></section>
-      <section class="hero-card"><div class="k">TRACKED SERIES</div><div class="value">14</div><div class="small">운임 · 벙커 · 원료</div></section>
-      <section class="hero-card"><div class="k">ARCHIVE</div><div class="value">1</div><div class="small">누적 HTML 리포트</div></section>
-    </div>
+<header class="hero"><div class="wrap">
+  <div class="top"><div><div class="brand-kicker"><span class="mark">AFM</span>AROMATICS FREIGHT MONITOR</div><h1>Freight &amp; Bunker<br>Market Intelligence</h1><div class="subtitle">Chemical Freight · Bunker · Market Intelligence</div><div class="creator"><b>LAM</b><span>created by JS Kim</span></div></div>
+  <div class="actions"><a class="btn primary" href="latest.html">최신 리포트 열기</a><a class="btn" href="https://script.google.com/macros/s/AKfycbzc08bNohxOAV_iE8x8YZ7v1sOn7tyIID3xK2eoXR6vlrZOIxHBn66-sZGoKDiyF5lH/exec?page=admin">관리자 모드</a></div></div>
+  <div class="hero-grid">
+    <section class="hero-card hero-main"><div class="k">LATEST MARKET BRIEF</div><div class="title">북아시아 HSFO 종목 브리핑 (2026-09-28)</div><div class="summary">Singapore HSFO 벤치마크가 소폭 하락했음에도 Zhoushan과 Hong Kong의 프롬프트 재고 부족과 제한적 오퍼가 Delivered 프리미엄을 끌어올리며 북아시아 현물시장 상승마감 10월 중순 이후 일부 신규 카고 유입이 예상되지만 Zhoushan과 Hong Kong의 즉시 인도 재고 부족과 스팟 오퍼 제한이 지속돼 단기 북아시아 Delivered HSFO 가격 및 프리미엄 강세 전망</div></section>
+    <section class="hero-card"><div class="k">LATEST DATE</div><div class="value">2026-09-28</div><div class="small">최신 평가 기준일</div></section>
+    <section class="hero-card"><div class="k">TRACKED SERIES</div><div class="value">14</div><div class="small">운임 · 벙커 · 원료</div></section>
+    <section class="hero-card"><div class="k">ARCHIVE</div><div class="value">1</div><div class="small">누적 HTML 리포트</div></section>
   </div>
-</header>
-
-<main>
-  <div class="wrap dashboard-grid">
-    <section class="panel">
-      <div class="panel-head"><div><h2>Daily Research Archive</h2><p>최신 리포트와 날짜별 HTML 아카이브</p></div><span class="pill">LATEST · 2026-09-28</span></div>
-      <article class="latest">
-        <div class="date">2026-09-28 · DAILY REPORT</div>
-        <h3>아로마 케미칼 운임 · 벙커 대시보드</h3>
-        <div class="desc">핵심 지표, 기간별 등락, 벙커 코멘터리, 추세 분석, 개별 지표, 운임 변동 내역을 통합한 최신 리서치 화면.</div>
-        <a class="open" href="freight_20260928.html">최신 리포트 바로 열기 →</a>
-      </article>
-      <div class="archive">
-        <a class="report" href="freight_20260928.html"><div class="report-date">2026-09-28</div><div><div class="report-title">운임 · 벙커 데일리 리포트</div><div class="report-file">freight_20260928.html</div></div><div class="arrow">→</div></a>
-      </div>
-    </section>
-
-    <aside class="panel">
-      <div class="panel-head"><div><h2>Platform Snapshot</h2><p>현재 운영 구조</p></div></div>
-      <div class="side-grid">
-        <div class="info"><div class="name">DATA HISTORY</div><div class="big">2021-01-04</div><div class="note">평가 시계열 시작일</div></div>
-        <div class="info"><div class="name">PUBLISH MODE</div><div class="big">HTML</div><div class="note">날짜별 리포트 누적 · 최신본 자동 연결</div></div>
-        <div class="info"><div class="name">APP MODE</div><div class="big">WebView</div><div class="note">GitHub Pages 변경사항을 APK에 즉시 반영</div></div>
-      </div>
-      <div class="workflow"><b>DAILY WORKFLOW</b><p>완성된 freight_YYYYMMDD.html 업로드 → 목록 자동 갱신 → latest.html 자동 교체 → APK 자동 반영</p></div>
-    </aside>
-  </div>
-</main>
+</div></header>
+<main><div class="wrap dashboard-grid">
+  <section class="panel">
+    <div class="panel-head"><div><h2>Daily Research Archive</h2><p>최신 리포트와 날짜별 HTML 아카이브</p></div><span class="pill">LATEST · 2026-09-28</span></div>
+    <article class="latest"><div class="date">2026-09-28 · DAILY REPORT</div><h3>아로마 케미칼 운임 · 벙커 대시보드</h3><div class="desc">핵심 지표, 기간별 등락, 벙커 코멘터리, 추세 분석, 개별 지표, 운임 변동 내역을 통합한 최신 리서치 화면.</div><a class="open" href="freight_20260928.html">최신 리포트 바로 열기 →</a></article>
+    <div class="archive"><a class="report" href="freight_20260928.html"><div class="report-date">2026-09-28</div><div><div class="report-title">운임 · 벙커 데일리 리포트</div><div class="report-file">freight_20260928.html</div></div><div class="arrow">→</div></a></div>
+  </section>
+  <aside class="panel">
+    <div class="panel-head"><div><h2>Platform Snapshot</h2><p>현재 운영 구조</p></div></div>
+    <div class="side-grid">
+      <div class="info"><div class="name">DATA HISTORY</div><div class="big">2021-01-04</div><div class="note">평가 시계열 시작일</div></div>
+      <div class="info"><div class="name">PUBLISH MODE</div><div class="big">HTML</div><div class="note">날짜별 리포트 누적 · 최신본 자동 연결</div></div>
+      <div class="info"><div class="name">APP MODE</div><div class="big">WebView</div><div class="note">GitHub Pages 변경사항을 APK에 즉시 반영</div></div>
+    </div>
+    <div class="workflow"><b>DAILY WORKFLOW</b><p>완성된 freight_YYYYMMDD.html 업로드 → 목록 자동 갱신 → latest.html 자동 교체 → APK 자동 반영</p></div>
+  </aside>
+</div></main>
 <footer><div class="wrap">Aromatics Freight Monitor · S&amp;P Global Platts 기반 운임·벙커 리서치 플랫폼</div></footer>
-</body>
-</html>
+</body></html>
