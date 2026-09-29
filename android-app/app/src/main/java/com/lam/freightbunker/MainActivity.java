@@ -42,6 +42,7 @@ public class MainActivity extends Activity {
     private ProgressBar progressBar;
     private TextView offline;
     private Button adminButton;
+    private Button dashboardButton;
     private ValueCallback<Uri[]> filePathCallback;
     private boolean adminMode = false;
     private boolean publicFallbackUsed = false;
@@ -116,6 +117,29 @@ public class MainActivity extends Activity {
         adminParams.gravity = Gravity.END | Gravity.BOTTOM;
         adminParams.setMargins(dp(10), dp(10), dp(12), dp(14));
         root.addView(adminButton, adminParams);
+
+        dashboardButton = new Button(this);
+        dashboardButton.setText("← 대시보드로 돌아가기");
+        dashboardButton.setTextColor(Color.WHITE);
+        dashboardButton.setTextSize(12);
+        dashboardButton.setAllCaps(false);
+        dashboardButton.setPadding(dp(14), 0, dp(14), 0);
+        dashboardButton.setVisibility(View.GONE);
+
+        GradientDrawable dashboardBg = new GradientDrawable();
+        dashboardBg.setColor(Color.rgb(11, 46, 99));
+        dashboardBg.setCornerRadius(dp(10));
+        dashboardButton.setBackground(dashboardBg);
+        dashboardButton.setElevation(dp(8));
+        dashboardButton.setOnClickListener(v -> loadDashboard());
+
+        FrameLayout.LayoutParams dashboardParams = new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                dp(44)
+        );
+        dashboardParams.gravity = Gravity.START | Gravity.TOP;
+        dashboardParams.setMargins(dp(12), dp(10), dp(12), 0);
+        root.addView(dashboardButton, dashboardParams);
 
         webView.setWebChromeClient(new WebChromeClient() {
             @Override
@@ -200,7 +224,8 @@ public class MainActivity extends Activity {
 
     private void openAdmin() {
         adminMode = true;
-        adminButton.setText("대시보드");
+        adminButton.setVisibility(View.GONE);
+        dashboardButton.setVisibility(View.VISIBLE);
         offline.setVisibility(View.GONE);
         pendingHtml = "";
         webView.loadUrl(ADMIN_URL);
@@ -209,6 +234,8 @@ public class MainActivity extends Activity {
     private void loadDashboard() {
         adminMode = false;
         adminButton.setText("HTML 업로드");
+        adminButton.setVisibility(View.VISIBLE);
+        dashboardButton.setVisibility(View.GONE);
         offline.setVisibility(View.GONE);
         publicFallbackUsed = false;
 
