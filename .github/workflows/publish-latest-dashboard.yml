@@ -18,42 +18,132 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Select newest dated dashboard
+      - name: Build latest page and report list
         shell: python
         run: |
           from pathlib import Path
           import re
           import shutil
+          from html import escape
 
-          candidates = []
+          reports = []
+
           for p in Path('.').glob('*.html'):
               m = re.fullmatch(r'freight_(\d{8})\.html', p.name, re.I)
               if m:
                   ymd = m.group(1)
-                  candidates.append((ymd, p))
+                  reports.append((ymd, p))
                   continue
 
               m = re.fullmatch(r'freight_bunker_dashboard_(\d{4})-(\d{2})-(\d{2})(?:_[A-Za-z0-9_-]+)?\.html', p.name, re.I)
               if m:
                   ymd = ''.join(m.groups())
-                  candidates.append((ymd, p))
+                  reports.append((ymd, p))
 
-          if not candidates:
+          if not reports:
               raise SystemExit('No dated freight dashboard HTML found.')
 
-          ymd, src = max(candidates, key=lambda x: x[0])
-          print(f'Publishing {src} ({ymd})')
-          shutil.copyfile(src, 'latest.html')
-          shutil.copyfile(src, 'index.html')
+          # 같은 날짜 파일이 여러 개면 짧은 표준 파일명을 우선 사용
+          best = {}
+          for ymd, p in reports:
+              score = 0 if re.fullmatch(r'freight_\d{8}\.html', p.name, re.I) else 1
+              if ymd not in best or score < best[ymd][0]:
+                  best[ymd] = (score, p)
 
-      - name: Commit latest dashboard
+          reports = sorted(
+              [(ymd, item[1]) for ymd, item in best.items()],
+              key=lambda x: x[0],
+              reverse=True
+          )
+
+          latest_ymd, latest_src = reports[0]
+          shutil.copyfile(latest_src, 'latest.html')
+
+          def date_text(ymd):
+              return f'{ymd[:4]}-{ymd[4:6]}-{ymd[6:8]}'
+
+          cards = []
+          for i, (ymd, p) in enumerate(reports):
+              latest_badge = '<span class="badge latest">LATEST</span>' if i == 0 else ''
+              cards.append(f'''
+              <a class="report" href="{escape(p.name)}">
+                <div class="report-top">
+                  <div class="date">{date_text(ymd)}</div>
+                  {latest_badge}
+                </div>
+                <div class="title">아로마 케미칼 운임 · 벙커 대시보드</div>
+                <div class="file">{escape(p.name)}</div>
+                <div class="open">리포트 열기 →</div>
+              </a>''')
+
+          index = f'''<!doctype html>
+          <html lang="ko">
+          <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width,initial-scale=1">
+          <title>F/B LAM · 리포트 목록</title>
+          <style>
+          *{{box-sizing:border-box}}
+          html,body{{margin:0;background:#f5f8fc;color:#0f172a;font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic","Segoe UI",sans-serif}}
+          body{{min-height:100vh}}
+          .hero{{background:linear-gradient(135deg,#061a3a,#0b2e63 62%,#164a8a);color:#fff;padding:34px 18px 30px;border-bottom:3px solid #c9a227}}
+          .wrap{{max-width:980px;margin:0 auto}}
+          .brand{{font-size:30px;font-weight:900;letter-spacing:.01em}}
+          .brand b{{color:#f3c934}}
+          .eyebrow{{font-size:11px;letter-spacing:.14em;color:#b8cce7;margin-top:4px}}
+          .hero-row{{display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap}}
+          .latest-btn{{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;background:#fff;color:#0b2e63;border-radius:9px;padding:10px 14px;font-size:12px;font-weight:800}}
+          main{{padding:20px 16px 34px}}
+          .head{{display:flex;align-items:end;justify-content:space-between;gap:12px;margin-bottom:12px}}
+          h1{{font-size:20px;margin:0;color:#0b2e63}}
+          .count{{font-size:11px;color:#64748b}}
+          .grid{{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}}
+          .report{{display:block;text-decoration:none;color:inherit;background:#fff;border:1px solid #dce5ef;border-radius:12px;padding:16px;box-shadow:0 4px 14px rgba(6,26,58,.05);transition:.15s}}
+          .report:hover{{transform:translateY(-1px);border-color:#98afd0}}
+          .report-top{{display:flex;align-items:center;justify-content:space-between;gap:10px}}
+          .date{{font-size:19px;font-weight:900;color:#0b2e63;font-variant-numeric:tabular-nums}}
+          .badge{{font-size:9px;font-weight:900;letter-spacing:.06em;border-radius:999px;padding:3px 8px}}
+          .badge.latest{{background:#fff4cc;color:#7b5a00;border:1px solid #eed477}}
+          .title{{font-size:13px;font-weight:800;margin-top:10px}}
+          .file{{font:11px ui-monospace,SFMono-Regular,Menlo,monospace;color:#64748b;margin-top:4px;word-break:break-all}}
+          .open{{font-size:11px;font-weight:800;color:#1f5fbf;margin-top:14px}}
+          .foot{{margin-top:16px;padding:11px 13px;border-left:3px solid #c9a227;background:#eef4fa;color:#52657d;font-size:11px;line-height:1.6}}
+          @media(max-width:620px){{.hero{{padding:26px 14px 24px}}.brand{{font-size:25px}}main{{padding:14px 10px 28px}}.grid{{grid-template-columns:1fr}}.report{{padding:14px}}}}
+          </style>
+          </head>
+          <body>
+          <header class="hero">
+            <div class="wrap hero-row">
+              <div>
+                <div class="brand">F/B <b>LAM</b></div>
+                <div class="eyebrow">AROMATICS FREIGHT &amp; BUNKER MONITOR</div>
+              </div>
+              <a class="latest-btn" href="latest.html">최신 리포트 바로 열기</a>
+            </div>
+          </header>
+          <main class="wrap">
+            <div class="head">
+              <h1>리포트 목록</h1>
+              <div class="count">총 {len(reports)}건 · 최신 {date_text(latest_ymd)}</div>
+            </div>
+            <div class="grid">
+              {''.join(cards)}
+            </div>
+            <div class="foot">날짜별 리포트 선택 화면 · 최신 보고서는 상단에 자동 정렬</div>
+          </main>
+          </body>
+          </html>'''
+
+          Path('index.html').write_text(index, encoding='utf-8')
+
+      - name: Commit latest dashboard and list
         run: |
           if git diff --quiet -- latest.html index.html; then
-            echo "No latest dashboard change."
+            echo "No publish change."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add latest.html index.html
-          git commit -m "Publish newest freight dashboard"
+          git commit -m "Publish latest dashboard and refresh report list"
           git push
