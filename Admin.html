@@ -122,8 +122,14 @@ function checkAdmin(){
   setAdminStatus('확인 중...',true);
   google.script.run
     .withSuccessHandler(r=>{
+      const ver=String(r.version||'');
       adminVerified=true;
-      setAdminStatus('✓ 관리자 인증 완료 · '+(r.spreadsheetName||'Google Sheet DB 연결'),true);
+      setAdminStatus(
+        '✓ 관리자 인증 완료 · '+(r.spreadsheetName||'Google Sheet DB 연결')+
+        ' · Backend v'+(ver||'?')+
+        ' · '+((r.github&&r.github.owner&&r.github.repo)?(r.github.owner+'/'+r.github.repo+'@'+r.github.branch):'GitHub 대상 확인 필요'),
+        true
+      );
       refreshButtons();
     })
     .withFailureHandler(err=>{
@@ -238,24 +244,48 @@ function saveFile(){
   }
 
   const btn=document.getElementById('saveBtn');
-  btn.disabled=true;btn.textContent='저장 · 발행 중...';
+  btn.disabled=true;
+  btn.textContent='저장 · GitHub 검증 중...';
 
   google.script.run
     .withSuccessHandler(r=>{
-      btn.textContent='저장 · 대시보드 발행';refreshButtons();
-      let detail='<strong>✓ 저장 및 대시보드 발행 완료</strong><br>'+
+      btn.textContent='저장 · 대시보드 발행';
+      refreshButtons();
+
+      if(!r || r.ok!==true || r.githubVerified!==true){
+        const msg=
+          '서버 응답은 받았지만 GitHub 저장본 검증이 완료되지 않았습니다.<br>'+
+          '완료로 처리하지 않습니다. Apps Script Backend v1.2.0 이상 배포 여부와 GitHub Token을 확인해 주세요.';
+        showResult('발행 검증 실패',msg,true);
+        return;
+      }
+
+      const bust=encodeURIComponent(String(r.contentHash||Date.now()));
+      const reportUrl=r.githubUrl
+        ? r.githubUrl+(r.githubUrl.indexOf('?')>=0?'&':'?')+'v='+bust
+        : '';
+      const homeUrl='https://jskimlam.github.io/aromatics-freight-bunker-monitor/?v='+bust;
+
+      let detail='<strong>✓ 저장 · GitHub 재조회 검증 완료</strong><br>'+
         '기준일: '+esc(r.date)+'<br>'+
         '처리: '+(r.overwritten?'기존 동일 리포트 갱신':'신규 저장')+'<br>'+
         '원본 HTML: '+(r.originalHtmlSaved?'보존 완료':'저장 확인 필요')+'<br>'+
-        'GitHub 발행: '+(r.githubPublished?'완료':'미발행');
-      if(r.githubUrl){
-        detail+='<br><a href="'+escAttr(r.githubUrl)+'" target="_top" style="display:inline-flex;margin-top:10px;padding:9px 13px;border-radius:8px;background:#0b2e63;color:#fff;text-decoration:none;font-weight:800">업데이트된 대시보드 열기 →</a>';
+        'GitHub 발행: 검증 완료<br>'+
+        '발행 대상: '+esc(r.githubTarget||'jskimlam/aromatics-freight-bunker-monitor@main')+'<br>'+
+        '날짜 파일 SHA: '+esc(String(r.githubSha||'').slice(0,12))+'<br>'+
+        'latest SHA: '+esc(String(r.latestSha||'').slice(0,12));
+
+      if(reportUrl){
+        detail+='<br><a href="'+escAttr(reportUrl)+'" target="_top" style="display:inline-flex;margin-top:10px;padding:9px 13px;border-radius:8px;background:#0b2e63;color:#fff;text-decoration:none;font-weight:800">검증된 9월/최신 리포트 열기 →</a>';
       }
-      detail+='<br><a href="https://jskimlam.github.io/aromatics-freight-bunker-monitor/" target="_top" style="display:inline-flex;margin-top:8px;padding:8px 12px;border-radius:8px;background:#e2e8f0;color:#0f172a;text-decoration:none;font-weight:800">메인 대시보드로 이동</a>';
+
+      detail+='<br><a href="'+escAttr(homeUrl)+'" target="_top" style="display:inline-flex;margin-top:8px;padding:8px 12px;border-radius:8px;background:#e2e8f0;color:#0f172a;text-decoration:none;font-weight:800">메인 대시보드 새로 열기</a>';
+
       if(r.warnings&&r.warnings.length){
         detail+='<br><span class="warn">검증 참고: '+esc(r.warnings.join(' / '))+'</span>';
       }
-      showResult('저장 · 발행 완료',detail,false);
+
+      showResult('저장 · 발행 검증 완료',detail,false);
 
       try{
         if(window.FBApp&&typeof window.FBApp.onSaved==='function'){
@@ -264,9 +294,14 @@ function saveFile(){
       }catch(e){}
     })
     .withFailureHandler(err=>{
-      btn.textContent='저장 · 대시보드 발행';refreshButtons();
+      btn.textContent='저장 · 대시보드 발행';
+      refreshButtons();
       const msg=err&&err.message?err.message:String(err);
-      showResult('저장 오류',esc(msg),true);
+      showResult(
+        '저장 · 발행 실패',
+        esc(msg)+'<br><br><b>GitHub 검증을 통과하지 못했으므로 완료 처리하지 않았습니다.</b>',
+        true
+      );
     })
     .saveHtmlFromAdmin({
       adminPassword:password(),
