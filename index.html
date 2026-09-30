@@ -31,17 +31,17 @@ main{padding:26px 0 52px}.dashboard-grid{display:grid;grid-template-columns:minm
   <div class="top"><div><div class="brand-kicker"><span class="mark">AFM</span>AROMATICS FREIGHT MONITOR</div><h1>Freight &amp; Bunker<br>Market Intelligence</h1><div class="subtitle">Chemical Freight · Bunker · Market Intelligence</div><div class="creator"><b>LAM</b><span>created by JS Kim</span></div></div>
   <div class="actions"><a class="btn primary" href="latest.html">최신 리포트 열기</a><a class="btn" href="https://script.google.com/macros/s/AKfycbzc08bNohxOAV_iE8x8YZ7v1sOn7tyIID3xK2eoXR6vlrZOIxHBn66-sZGoKDiyF5lH/exec?page=admin">관리자 모드</a></div></div>
   <div class="hero-grid">
-    <section class="hero-card hero-main"><div class="k">LATEST MARKET BRIEF</div><div class="title">북아시아 HSFO 종목 브리핑 (2026-09-29)</div><div class="summary">Singapore HSFO 벤치마크 급락으로 북아시아 Delivered 절대가격도 전반적으로 하락했으나 Tokyo Bay 수요 증가와 Hong Kong 극심한 재고 부족으로 지역 프리미엄은 오히려 견조 또는 확대되며 하락마감 Singapore HSFO 급락으로 절대가격은 조정됐으나 Tokyo Bay의 수요 증가와 Hong Kong의 극심한 재고 부족, Zhoushan의 10월 중순까지 제한된 공급이 북아시아 Delivered 프리미엄을 지지해 단기 가격 하락폭 제한 전망</div></section>
-    <section class="hero-card"><div class="k">LATEST DATE</div><div class="value">2026-09-29</div><div class="small">최신 평가 기준일</div></section>
-    <section class="hero-card"><div class="k">TRACKED SERIES</div><div class="value">18</div><div class="small">운임 · 벙커 · 원료</div></section>
-    <section class="hero-card"><div class="k">ARCHIVE</div><div class="value">2</div><div class="small">누적 HTML 리포트</div></section>
+    <section class="hero-card hero-main"><div class="k">LATEST MARKET BRIEF</div><div class="title" id="liveBriefTitle">북아시아 HSFO 종목 브리핑</div><div class="summary" id="liveBriefSummary">최신 운임·벙커 리포트를 불러오는 중.</div></section>
+    <section class="hero-card"><div class="k">LATEST DATE</div><div class="value" id="liveLatestDate">–</div><div class="small">최신 평가 기준일</div></section>
+    <section class="hero-card"><div class="k">TRACKED SERIES</div><div class="value" id="liveTracked">–</div><div class="small">운임 · 벙커 · 원료</div></section>
+    <section class="hero-card"><div class="k">ARCHIVE</div><div class="value" id="liveArchiveCount">–</div><div class="small">누적 HTML 리포트</div></section>
   </div>
 </div></header>
 <main><div class="wrap dashboard-grid">
   <section class="panel">
-    <div class="panel-head"><div><h2>Daily Research Archive</h2><p>최신 리포트와 날짜별 HTML 아카이브</p></div><span class="pill">LATEST · 2026-09-29</span></div>
-    <article class="latest"><div class="date">2026-09-29 · DAILY REPORT</div><h3>아로마 케미칼 운임 · 벙커 대시보드</h3><div class="desc">핵심 지표, 기간별 등락, 벙커 코멘터리, 추세 분석, 개별 지표, 운임 변동 내역을 통합한 최신 리서치 화면.</div><a class="open" href="freight_20260929.html">최신 리포트 바로 열기 →</a></article>
-    <div class="archive"><a class="report" href="freight_20260929.html"><div class="report-date">2026-09-29</div><div><div class="report-title">운임 · 벙커 데일리 리포트</div><div class="report-file">freight_20260929.html</div></div><div class="arrow">→</div></a><a class="report" href="freight_20260928.html"><div class="report-date">2026-09-28</div><div><div class="report-title">운임 · 벙커 데일리 리포트</div><div class="report-file">freight_20260928.html</div></div><div class="arrow">→</div></a></div>
+    <div class="panel-head"><div><h2>Daily Research Archive</h2><p>최신 리포트와 날짜별 HTML 아카이브</p></div><span class="pill" id="liveLatestPill">LATEST</span></div>
+    <article class="latest"><div class="date" id="liveArticleDate">최신 리포트 확인 중</div><h3>아로마 케미칼 운임 · 벙커 대시보드</h3><div class="desc">핵심 지표, 기간별 등락, 벙커 코멘터리, 추세 분석, 개별 지표, 운임 변동 내역을 통합한 최신 리서치 화면.</div><a class="open" id="liveLatestOpen" href="latest.html">최신 리포트 바로 열기 →</a></article>
+    <div class="archive" id="liveArchive"><div class="report"><div class="report-date">–</div><div><div class="report-title">아카이브 불러오는 중</div><div class="report-file">GitHub 저장소 확인 중</div></div><div class="arrow">…</div></div></div>
   </section>
   <aside class="panel wti-panel" id="wtiPanel">
   <div class="wti-head">
@@ -62,6 +62,94 @@ main{padding:26px 0 52px}.dashboard-grid{display:grid;grid-template-columns:minm
 </aside></aside>
   </div></main>
 <footer><div class="wrap">Aromatics Freight Monitor · S&amp;P Global Platts 기반 운임·벙커 리서치 플랫폼</div></footer>
+<script>
+(function(){
+  var REPO='jskimlam/aromatics-freight-bunker-monitor';
+
+  function el(id){return document.getElementById(id);}
+  function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(ch){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch];});}
+  function isoFromYmd(ymd){return ymd.slice(0,4)+'-'+ymd.slice(4,6)+'-'+ymd.slice(6,8);}
+  function cacheUrl(url){return url+(url.indexOf('?')>=0?'&':'?')+'v='+Date.now();}
+
+  fetch(cacheUrl('latest.html'),{cache:'no-store'})
+    .then(function(r){if(!r.ok)throw new Error('latest');return r.text();})
+    .then(function(html){
+      var doc=new DOMParser().parseFromString(html,'text/html');
+      var rawNode=doc.getElementById('rawData');
+      var cmtNode=doc.getElementById('cmtData');
+      var raw=rawNode?JSON.parse(rawNode.textContent||'{}'):{};
+      var cmts=cmtNode?JSON.parse(cmtNode.textContent||'[]'):[];
+      var latestDate=(raw.d&&raw.d.length)?String(raw.d[raw.d.length-1]):'–';
+      var tracked=(raw.c&&raw.c.length)?raw.c.length:'–';
+      var latestCmt=null;
+
+      if(Array.isArray(cmts)&&cmts.length){
+        cmts.sort(function(a,b){return String(a.date||'')<String(b.date||'')?1:-1;});
+        latestCmt=cmts[0];
+      }
+
+      if(el('liveLatestDate'))el('liveLatestDate').textContent=latestDate;
+      if(el('liveTracked'))el('liveTracked').textContent=String(tracked);
+      if(el('liveLatestPill'))el('liveLatestPill').textContent='LATEST · '+latestDate;
+      if(el('liveArticleDate'))el('liveArticleDate').textContent=latestDate+' · DAILY REPORT';
+      if(el('liveLatestOpen'))el('liveLatestOpen').href=cacheUrl('latest.html');
+
+      if(latestCmt){
+        if(el('liveBriefTitle'))el('liveBriefTitle').textContent=latestCmt.title||'북아시아 HSFO 종목 브리핑';
+        var sum=Array.isArray(latestCmt.sum)?latestCmt.sum.slice(0,2).join(' '):'';
+        if(el('liveBriefSummary'))el('liveBriefSummary').textContent=sum||'최신 운임·벙커 리포트';
+      }
+    })
+    .catch(function(){
+      if(el('liveBriefSummary'))el('liveBriefSummary').textContent='latest.html을 불러오지 못했습니다. 새로고침 후 다시 확인 필요.';
+    });
+
+  fetch('https://api.github.com/repos/'+REPO+'/contents?ref=main&_='+Date.now(),{
+    cache:'no-store',
+    headers:{'Accept':'application/vnd.github+json'}
+  })
+    .then(function(r){if(!r.ok)throw new Error('archive');return r.json();})
+    .then(function(items){
+      var byDate={};
+
+      (Array.isArray(items)?items:[]).forEach(function(x){
+        var n=String(x.name||'');
+        var m=/^freight_(\d{8})\.html$/i.exec(n);
+        if(m){byDate[m[1]]=n;return;}
+
+        m=/^freight_bunker_dashboard_(\d{4})-(\d{2})-(\d{2})(?:_[A-Za-z0-9_-]+)?\.html$/i.exec(n);
+        if(m){
+          var ymd=m[1]+m[2]+m[3];
+          if(!byDate[ymd])byDate[ymd]=n;
+        }
+      });
+
+      var dates=Object.keys(byDate).sort().reverse();
+      if(el('liveArchiveCount'))el('liveArchiveCount').textContent=String(dates.length);
+
+      var box=el('liveArchive');
+      if(!box)return;
+
+      if(!dates.length){
+        box.innerHTML='<div class="report"><div class="report-date">–</div><div><div class="report-title">저장된 리포트 없음</div></div><div class="arrow">–</div></div>';
+        return;
+      }
+
+      box.innerHTML=dates.map(function(ymd){
+        var name=byDate[ymd];
+        return '<a class="report" href="'+esc(cacheUrl(name))+'">'+
+          '<div class="report-date">'+esc(isoFromYmd(ymd))+'</div>'+
+          '<div><div class="report-title">운임 · 벙커 데일리 리포트</div>'+
+          '<div class="report-file">'+esc(name)+'</div></div>'+
+          '<div class="arrow">→</div></a>';
+      }).join('');
+    })
+    .catch(function(){
+      var box=el('liveArchive');
+      if(box)box.innerHTML='<div class="report"><div class="report-date">–</div><div><div class="report-title">아카이브 목록 로드 실패</div><div class="report-file">최신 리포트는 상단 버튼에서 확인</div></div><div class="arrow">!</div></div>';
+    });
+})();
+</script>
 <script>(function(){
   function el(id){return document.getElementById(id);}
   function md(d){return d.slice(5).replace('-','/');}
