@@ -20,7 +20,7 @@
  */
 
 const APP = {
-  VERSION: '1.1.0',
+  VERSION: '1.2.0',
   TZ: 'Asia/Seoul',
   HTML_CHUNK_SIZE: 40000,
 
@@ -258,57 +258,89 @@ function saveHtmlFromAdmin(payload) {
   let githubPath = '';
   let viewUrl = '';
   let githubStatus = 'sheet-only';
+  let githubVerified = false;
+  let githubSha = '';
+  let latestSha = '';
+  let contentHash = sha256Text_(htmlText);
 
-  if (publishToGithub) {
-    const cfg = githubConfig_();
-    if (!cfg.tokenConfigured) {
-      throw new Error('GitHub Token이 설정되어 있지 않습니다.');
+  try {
+    if (publishToGithub) {
+      const cfg = githubConfig_();
+      assertGithubTarget_(cfg);
+
+      if (!cfg.tokenConfigured) {
+        throw new Error('GitHub Token이 설정되어 있지 않습니다.');
+      }
+
+      githubPath = buildGithubPath_(info.date);
+
+      const datedWrite = publishGithubHtml_(githubPath, htmlText, info.date, false);
+      const datedVerify = verifyGithubHtml_(githubPath, htmlText, info.date);
+
+      const latestWrite = publishGithubHtml_('latest.html', htmlText, info.date, true);
+      const latestVerify = verifyGithubHtml_('latest.html', htmlText, info.date);
+
+      githubSha = datedVerify.sha || (datedWrite && datedWrite.content ? datedWrite.content.sha : '');
+      latestSha = latestVerify.sha || (latestWrite && latestWrite.content ? latestWrite.content.sha : '');
+
+      if (!datedVerify.ok || !latestVerify.ok) {
+        throw new Error('GitHub 발행 검증에 실패했습니다.');
+      }
+
+      githubVerified = true;
+      viewUrl = cfg.pagesBase.replace(/\/+$/, '') + '/' + githubPath;
+      githubStatus = 'published-verified';
     }
 
-    githubPath = buildGithubPath_(info.date);
-    publishGithubHtml_(githubPath, htmlText, info.date);
+    upsertMaster_({
+      date: info.date,
+      title: title,
+      filename: fileName,
+      viewUrl: viewUrl,
+      githubPath: githubPath,
+      status: githubStatus,
+      htmlChars: htmlText.length,
+      htmlChunks: chunks.length
+    });
 
-    // Convenience latest copy.
-    publishGithubHtml_('latest.html', htmlText, info.date, true);
+    writeLog_(
+      info.date,
+      publishToGithub ? 'HTML_SAVE_PUBLISH' : 'HTML_SAVE',
+      'OK',
+      fileName + ' · ' + htmlText.length + ' chars · ' + chunks.length +
+        ' chunks' + (githubVerified ? ' · GitHub verified' : '')
+    );
 
-    viewUrl = cfg.pagesBase.replace(/\/+$/, '') + '/' + githubPath;
-    githubStatus = 'published';
+    return {
+      ok: true,
+      date: info.date,
+      title: title,
+      fileName: fileName,
+      overwritten: overwritten,
+      originalHtmlSaved: true,
+      htmlChars: htmlText.length,
+      htmlChunks: chunks.length,
+      githubPublished: publishToGithub && githubVerified,
+      githubVerified: githubVerified,
+      githubPath: githubPath,
+      githubUrl: viewUrl,
+      githubSha: githubSha,
+      latestSha: latestSha,
+      contentHash: contentHash,
+      githubTarget: APP.DEFAULT_GITHUB_OWNER + '/' + APP.DEFAULT_GITHUB_REPO + '@' + APP.DEFAULT_GITHUB_BRANCH,
+      warnings: validation.warnings
+    };
+
+  } catch (err) {
+    writeLog_(
+      info.date,
+      publishToGithub ? 'HTML_SAVE_PUBLISH' : 'HTML_SAVE',
+      'ERROR',
+      fileName + ' · ' + String(err && err.message ? err.message : err)
+    );
+    throw err;
   }
-
-  upsertMaster_({
-    date: info.date,
-    title: title,
-    filename: fileName,
-    viewUrl: viewUrl,
-    githubPath: githubPath,
-    status: githubStatus,
-    htmlChars: htmlText.length,
-    htmlChunks: chunks.length
-  });
-
-  writeLog_(
-    info.date,
-    publishToGithub ? 'HTML_SAVE_PUBLISH' : 'HTML_SAVE',
-    'OK',
-    fileName + ' · ' + htmlText.length + ' chars · ' + chunks.length + ' chunks'
-  );
-
-  return {
-    ok: true,
-    date: info.date,
-    title: title,
-    fileName: fileName,
-    overwritten: overwritten,
-    originalHtmlSaved: true,
-    htmlChars: htmlText.length,
-    htmlChunks: chunks.length,
-    githubPublished: publishToGithub,
-    githubPath: githubPath,
-    githubUrl: viewUrl,
-    warnings: validation.warnings
-  };
 }
-
 
 function getRecentReportsFromAdmin(adminPassword, limit) {
   verifyAdminPassword_(adminPassword);
@@ -603,13 +635,35 @@ function writeLog_(dataDate, type, status, note) {
 function githubConfig_() {
   const p = PropertiesService.getScriptProperties();
 
+  // 이 프로젝트는 발행 대상 저장소를 고정한다.
+  // 과거 Script Properties에 남은 잘못된 owner/repo/branch 값으로
+  // 다른 저장소에 '성공' 표시되는 문제를 원천 차단한다.
   return {
-    owner: p.getProperty('GITHUB_OWNER') || APP.DEFAULT_GITHUB_OWNER,
-    repo: p.getProperty('GITHUB_REPO') || APP.DEFAULT_GITHUB_REPO,
-    branch: p.getProperty('GITHUB_BRANCH') || APP.DEFAULT_GITHUB_BRANCH,
-    pagesBase: p.getProperty('GITHUB_PAGES_BASE') || APP.DEFAULT_PAGES_BASE,
+    owner: APP.DEFAULT_GITHUB_OWNER,
+    repo: APP.DEFAULT_GITHUB_REPO,
+    branch: APP.DEFAULT_GITHUB_BRANCH,
+    pagesBase: APP.DEFAULT_PAGES_BASE,
     tokenConfigured: !!p.getProperty('GITHUB_TOKEN')
   };
+}
+
+
+function assertGithubTarget_(cfg) {
+  const expected =
+    APP.DEFAULT_GITHUB_OWNER + '/' +
+    APP.DEFAULT_GITHUB_REPO + '@' +
+    APP.DEFAULT_GITHUB_BRANCH;
+
+  const actual =
+    String(cfg.owner || '') + '/' +
+    String(cfg.repo || '') + '@' +
+    String(cfg.branch || '');
+
+  if (actual !== expected) {
+    throw new Error(
+      'GitHub 발행 대상 불일치: ' + actual + ' (예상: ' + expected + ')'
+    );
+  }
 }
 
 
@@ -620,55 +674,114 @@ function buildGithubPath_(date) {
 
 function publishGithubHtml_(path, htmlText, date, latestMode) {
   const cfg = githubConfig_();
-  const token = PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
+  assertGithubTarget_(cfg);
 
+  const token = PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
   if (!token) throw new Error('GitHub Token이 설정되어 있지 않습니다.');
 
-  const existingSha = getGithubFileSha_(cfg, token, path);
+  const endpoint = githubContentsEndpoint_(cfg, path);
+  let lastMessage = '';
 
-  const endpoint = 'https://api.github.com/repos/' +
-    encodeURIComponent(cfg.owner) + '/' +
-    encodeURIComponent(cfg.repo) + '/contents/' +
-    path.split('/').map(encodeURIComponent).join('/');
+  // 동일 시점의 GitHub Actions / 재업로드와 SHA가 충돌할 수 있으므로
+  // 최신 SHA를 다시 조회하여 최대 3회 재시도한다.
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    const existingSha = getGithubFileSha_(cfg, token, path);
 
-  const payload = {
-    message: latestMode
-      ? 'Update latest freight & bunker dashboard ' + date
-      : 'Publish freight & bunker dashboard ' + date,
-    content: Utilities.base64Encode(
-      Utilities.newBlob(htmlText, 'text/html', 'index.html').getBytes()
-    ),
-    branch: cfg.branch
-  };
+    const payload = {
+      message: latestMode
+        ? 'Update latest freight & bunker dashboard ' + date
+        : 'Publish freight & bunker dashboard ' + date,
+      content: Utilities.base64Encode(
+        Utilities.newBlob(htmlText, 'text/html', 'index.html').getBytes()
+      ),
+      branch: cfg.branch
+    };
 
-  if (existingSha) payload.sha = existingSha;
+    if (existingSha) payload.sha = existingSha;
 
-  const res = UrlFetchApp.fetch(endpoint, {
-    method: 'put',
-    contentType: 'application/json',
-    headers: githubHeaders_(token),
-    payload: JSON.stringify(payload),
-    muteHttpExceptions: true
-  });
+    const res = UrlFetchApp.fetch(endpoint, {
+      method: 'put',
+      contentType: 'application/json',
+      headers: githubHeaders_(token),
+      payload: JSON.stringify(payload),
+      muteHttpExceptions: true
+    });
 
-  const code = res.getResponseCode();
-  if (code < 200 || code >= 300) {
-    throw new Error(
-      'GitHub 발행 실패 (' + code + '): ' +
-      trimText_(res.getContentText(), 500)
-    );
+    const code = res.getResponseCode();
+    const body = res.getContentText();
+
+    if (code >= 200 && code < 300) {
+      return JSON.parse(body);
+    }
+
+    lastMessage =
+      'GitHub 발행 실패 (' + code + ', 시도 ' + attempt + '/3): ' +
+      trimText_(body, 500);
+
+    if (code !== 409 && code !== 422) break;
+    Utilities.sleep(350 * attempt);
   }
 
-  return JSON.parse(res.getContentText());
+  throw new Error(lastMessage || 'GitHub 발행 실패');
 }
 
 
-function getGithubFileSha_(cfg, token, path) {
-  const endpoint = 'https://api.github.com/repos/' +
-    encodeURIComponent(cfg.owner) + '/' +
-    encodeURIComponent(cfg.repo) + '/contents/' +
-    path.split('/').map(encodeURIComponent).join('/') +
-    '?ref=' + encodeURIComponent(cfg.branch);
+function verifyGithubHtml_(path, expectedHtml, expectedDate) {
+  const cfg = githubConfig_();
+  assertGithubTarget_(cfg);
+
+  const token = PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
+  if (!token) throw new Error('GitHub Token이 설정되어 있지 않습니다.');
+
+  // GitHub Contents API의 read-after-write 결과를 실제로 다시 읽어 비교한다.
+  // 잠깐의 일관성 지연에 대비하여 3회 확인한다.
+  let last = null;
+
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    const remote = getGithubFile_(cfg, token, path);
+    last = remote;
+
+    if (remote && remote.content != null) {
+      const remoteDate = extractEmbeddedRawDate_(remote.content);
+      const expectedHash = sha256Text_(expectedHtml);
+      const remoteHash = sha256Text_(remote.content);
+
+      if (
+        remoteDate === expectedDate &&
+        expectedHash === remoteHash &&
+        String(remote.content).length === String(expectedHtml).length
+      ) {
+        return {
+          ok: true,
+          sha: remote.sha,
+          date: remoteDate,
+          hash: remoteHash,
+          chars: String(remote.content).length
+        };
+      }
+    }
+
+    Utilities.sleep(350 * attempt);
+  }
+
+  const lastDate = last && last.content
+    ? extractEmbeddedRawDate_(last.content)
+    : '';
+
+  throw new Error(
+    'GitHub 발행 검증 실패: ' + path +
+    ' · 예상 기준일 ' + expectedDate +
+    ' · 확인 기준일 ' + (lastDate || '없음') +
+    ' · 업로드 원본과 GitHub 저장본이 일치하지 않습니다.'
+  );
+}
+
+
+function getGithubFile_(cfg, token, path) {
+  const endpoint =
+    githubContentsEndpoint_(cfg, path) +
+    '?ref=' + encodeURIComponent(cfg.branch) +
+    '&_=' + Date.now();
 
   const res = UrlFetchApp.fetch(endpoint, {
     method: 'get',
@@ -676,17 +789,60 @@ function getGithubFileSha_(cfg, token, path) {
     muteHttpExceptions: true
   });
 
-  if (res.getResponseCode() === 404) return '';
+  const code = res.getResponseCode();
+  if (code === 404) return null;
 
-  if (res.getResponseCode() < 200 || res.getResponseCode() >= 300) {
+  if (code < 200 || code >= 300) {
     throw new Error(
-      'GitHub 기존 파일 조회 실패 (' + res.getResponseCode() + '): ' +
+      'GitHub 파일 조회 실패 (' + code + '): ' +
       trimText_(res.getContentText(), 300)
     );
   }
 
   const obj = JSON.parse(res.getContentText());
-  return String(obj.sha || '');
+  let content = '';
+
+  if (String(obj.encoding || '').toLowerCase() === 'base64') {
+    const clean = String(obj.content || '').replace(/\s/g, '');
+    content = Utilities.newBlob(
+      Utilities.base64Decode(clean)
+    ).getDataAsString('UTF-8');
+  } else {
+    content = String(obj.content || '');
+  }
+
+  return {
+    sha: String(obj.sha || ''),
+    content: content
+  };
+}
+
+
+function getGithubFileSha_(cfg, token, path) {
+  const obj = getGithubFile_(cfg, token, path);
+  return obj ? String(obj.sha || '') : '';
+}
+
+
+function githubContentsEndpoint_(cfg, path) {
+  return 'https://api.github.com/repos/' +
+    encodeURIComponent(cfg.owner) + '/' +
+    encodeURIComponent(cfg.repo) + '/contents/' +
+    path.split('/').map(encodeURIComponent).join('/');
+}
+
+
+function sha256Text_(text) {
+  const bytes = Utilities.computeDigest(
+    Utilities.DigestAlgorithm.SHA_256,
+    String(text || ''),
+    Utilities.Charset.UTF_8
+  );
+
+  return bytes.map(function(b) {
+    const n = b < 0 ? b + 256 : b;
+    return ('0' + n.toString(16)).slice(-2);
+  }).join('');
 }
 
 
@@ -695,10 +851,10 @@ function githubHeaders_(token) {
     Authorization: 'Bearer ' + token,
     Accept: 'application/vnd.github+json',
     'X-GitHub-Api-Version': '2022-11-28',
+    'Cache-Control': 'no-cache',
     'User-Agent': 'Aromatics-Freight-Bunker-Monitor'
   };
 }
-
 
 /* =========================================================
  * 7. SHEET INITIALIZATION
