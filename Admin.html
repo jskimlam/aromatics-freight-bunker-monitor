@@ -52,7 +52,22 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#0f172a}
   </section>
 
   <section class="card">
-    <h2>2. HTML 업로드</h2>
+    <h2>2. GitHub 연결</h2>
+    <div class="rules">
+      GitHub Token은 화면에 다시 표시하지 않으며 Apps Script의 <code>GITHUB_TOKEN</code> 속성에만 저장합니다.<br>
+      대상 저장소: <code>jskimlam/aromatics-freight-bunker-monitor@main</code>
+    </div>
+    <div class="row">
+      <div style="flex:1;min-width:240px">
+        <input id="githubToken" type="password" autocomplete="off" placeholder="새 GitHub Token 입력 (github_pat_... 또는 ghp_...)">
+      </div>
+      <button class="primary" id="tokenSaveBtn" onclick="saveGithubToken()" disabled>Token 검증 · 저장</button>
+    </div>
+    <div id="githubStatus" class="hint">관리자 인증 후 GitHub Token 상태를 확인합니다.</div>
+  </section>
+
+  <section class="card">
+    <h2>3. HTML 업로드</h2>
     <div class="rules">
       <strong>파일명 규칙</strong><br>
       데일리: <code>freight_YYYYMMDD.html</code><br>
@@ -79,7 +94,7 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#0f172a}
   </section>
 
   <section class="card" id="previewCard" style="display:none">
-    <h2>3. 미리보기</h2>
+    <h2>4. 미리보기</h2>
     <iframe id="previewFrame" class="preview" sandbox="allow-scripts allow-same-origin allow-downloads allow-popups"></iframe>
   </section>
 
@@ -94,14 +109,17 @@ let selectedFile=null;
 let selectedHtml='';
 let selectedMeta=null;
 let adminVerified=false;
+let githubTokenValid=false;
 
 const fileInput=document.getElementById('fileInput');
 const dropZone=document.getElementById('dropZone');
+const githubToken=document.getElementById('githubToken');
 
 fileInput.addEventListener('change',e=>{if(e.target.files&&e.target.files[0])loadFile(e.target.files[0]);});
 ['dragenter','dragover'].forEach(ev=>dropZone.addEventListener(ev,e=>{e.preventDefault();dropZone.classList.add('drag');}));
 ['dragleave','drop'].forEach(ev=>dropZone.addEventListener(ev,e=>{e.preventDefault();dropZone.classList.remove('drag');}));
 dropZone.addEventListener('drop',e=>{const f=e.dataTransfer.files&&e.dataTransfer.files[0];if(f)loadFile(f);});
+githubToken.addEventListener('input',refreshButtons);
 
 function goDashboard(){
   try{
@@ -115,29 +133,83 @@ function goDashboard(){
 
 function password(){return document.getElementById('adminPassword').value;}
 function setAdminStatus(text,good){const el=document.getElementById('adminStatus');el.textContent=text;el.className='hint '+(good?'good':'bad');}
+function setGithubStatus(text,good){const el=document.getElementById('githubStatus');el.textContent=text;el.className='hint '+(good?'good':'bad');}
 
 function checkAdmin(){
   const pw=password();
   if(!pw){setAdminStatus('관리자 비밀번호를 입력하세요.',false);return;}
   setAdminStatus('확인 중...',true);
+  setGithubStatus('GitHub Token 상태 확인 중...',true);
+
   google.script.run
     .withSuccessHandler(r=>{
       const ver=String(r.version||'');
+      const g=r.github||{};
       adminVerified=true;
+      githubTokenValid=g.tokenValid===true;
+
       setAdminStatus(
         '✓ 관리자 인증 완료 · '+(r.spreadsheetName||'Google Sheet DB 연결')+
         ' · Backend v'+(ver||'?')+
-        ' · '+((r.github&&r.github.owner&&r.github.repo)?(r.github.owner+'/'+r.github.repo+'@'+r.github.branch):'GitHub 대상 확인 필요'),
+        ' · '+((g.owner&&g.repo)?(g.owner+'/'+g.repo+'@'+g.branch):'GitHub 대상 확인 필요'),
         true
       );
+
+      if(githubTokenValid){
+        setGithubStatus('✓ GitHub Token 인증 정상 · '+g.owner+'/'+g.repo+'@'+g.branch,true);
+      }else{
+        setGithubStatus('GitHub Token 확인 필요 · '+(g.tokenMessage||'새 Token을 입력해 저장하세요.'),false);
+      }
+
       refreshButtons();
     })
     .withFailureHandler(err=>{
       adminVerified=false;
+      githubTokenValid=false;
       setAdminStatus(err.message||String(err),false);
+      setGithubStatus('관리자 인증 후 확인 가능합니다.',false);
       refreshButtons();
     })
     .getAdminConfig(pw);
+}
+
+function saveGithubToken(){
+  if(!adminVerified){
+    setGithubStatus('관리자 인증을 먼저 완료해 주세요.',false);
+    return;
+  }
+
+  const token=String(githubToken.value||'').trim();
+  if(!token){
+    setGithubStatus('새 GitHub Token을 입력하세요.',false);
+    return;
+  }
+
+  const btn=document.getElementById('tokenSaveBtn');
+  btn.disabled=true;
+  btn.textContent='Token 검증 중...';
+  setGithubStatus('GitHub 인증 및 저장소 접근 확인 중...',true);
+
+  google.script.run
+    .withSuccessHandler(r=>{
+      githubToken.value='';
+      githubTokenValid=!!(r&&r.ok===true&&r.tokenValid===true);
+      btn.textContent='Token 검증 · 저장';
+
+      if(githubTokenValid){
+        setGithubStatus('✓ GitHub Token 검증·저장 완료 · '+(r.githubTarget||'jskimlam/aromatics-freight-bunker-monitor@main'),true);
+      }else{
+        setGithubStatus('GitHub Token 저장 결과를 확인할 수 없습니다.',false);
+      }
+      refreshButtons();
+    })
+    .withFailureHandler(err=>{
+      githubTokenValid=false;
+      btn.textContent='Token 검증 · 저장';
+      setGithubStatus(err&&err.message?err.message:String(err),false);
+      refreshButtons();
+    })
+    .saveGithubTokenFromAdmin(password(),token);
 }
 
 function validYmd(ymd){
@@ -215,8 +287,10 @@ function loadFile(file){
 
 function refreshButtons(){
   const fileOk=!!selectedFile&&!!selectedHtml&&!!selectedMeta;
+  const tokenText=String(githubToken.value||'').trim();
   document.getElementById('previewBtn').disabled=!fileOk;
-  document.getElementById('saveBtn').disabled=!(fileOk&&adminVerified);
+  document.getElementById('saveBtn').disabled=!(fileOk&&adminVerified&&githubTokenValid);
+  document.getElementById('tokenSaveBtn').disabled=!(adminVerified&&tokenText);
 }
 
 function previewFile(){
@@ -242,6 +316,10 @@ function saveFile(){
     showResult('저장 확인','관리자 인증을 먼저 완료해 주세요.',true);
     return;
   }
+  if(!githubTokenValid){
+    showResult('GitHub 연결 확인','GitHub Token 인증을 먼저 완료해 주세요.',true);
+    return;
+  }
 
   const btn=document.getElementById('saveBtn');
   btn.disabled=true;
@@ -255,7 +333,7 @@ function saveFile(){
       if(!r || r.ok!==true || r.githubVerified!==true){
         const msg=
           '서버 응답은 받았지만 GitHub 저장본 검증이 완료되지 않았습니다.<br>'+
-          '완료로 처리하지 않습니다. Apps Script Backend v1.2.0 이상 배포 여부와 GitHub Token을 확인해 주세요.';
+          '완료로 처리하지 않습니다. Apps Script Backend v1.2.1 이상 배포 여부와 GitHub Token을 확인해 주세요.';
         showResult('발행 검증 실패',msg,true);
         return;
       }
