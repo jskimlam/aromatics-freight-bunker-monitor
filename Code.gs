@@ -20,7 +20,7 @@
  */
 
 const APP = {
-  VERSION: '1.2.0',
+  VERSION: '1.2.1',
   TZ: 'Asia/Seoul',
   HTML_CHUNK_SIZE: 40000,
 
@@ -184,16 +184,72 @@ function getAdminConfig(adminPassword) {
 
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const github = githubConfig_();
+  const githubAuth = checkGithubToken_();
 
   return {
     ok: true,
     version: APP.VERSION,
     spreadsheetId: ss.getId(),
     spreadsheetName: ss.getName(),
-    github: github,
+    github: Object.assign({}, github, githubAuth),
     htmlChunkSize: APP.HTML_CHUNK_SIZE,
     recent: listReports_(30).reports
   };
+}
+
+
+function checkGithubToken_() {
+  const token = PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
+  const cfg = githubConfig_();
+
+  if (!token) {
+    return {
+      tokenConfigured: false,
+      tokenValid: false,
+      tokenStatus: 'missing',
+      tokenMessage: 'GitHub Token이 설정되어 있지 않습니다.'
+    };
+  }
+
+  try {
+    assertGithubTarget_(cfg);
+
+    const url = 'https://api.github.com/repos/' +
+      encodeURIComponent(cfg.owner) + '/' + encodeURIComponent(cfg.repo);
+
+    const res = UrlFetchApp.fetch(url, {
+      method: 'get',
+      headers: githubHeaders_(token),
+      muteHttpExceptions: true
+    });
+
+    const code = res.getResponseCode();
+
+    if (code >= 200 && code < 300) {
+      return {
+        tokenConfigured: true,
+        tokenValid: true,
+        tokenStatus: 'ok',
+        tokenMessage: 'GitHub Token 인증 정상'
+      };
+    }
+
+    return {
+      tokenConfigured: true,
+      tokenValid: false,
+      tokenStatus: 'invalid',
+      tokenMessage: 'GitHub Token 인증 실패 (' + code + '): ' +
+        trimText_(res.getContentText(), 180)
+    };
+
+  } catch (err) {
+    return {
+      tokenConfigured: true,
+      tokenValid: false,
+      tokenStatus: 'error',
+      tokenMessage: String(err && err.message ? err.message : err)
+    };
+  }
 }
 
 
@@ -223,7 +279,13 @@ function saveGithubTokenFromAdmin(adminPassword, token) {
   PropertiesService.getScriptProperties()
     .setProperty('GITHUB_TOKEN', token);
 
-  return {ok: true};
+  return {
+    ok: true,
+    tokenValid: true,
+    tokenStatus: 'ok',
+    tokenMessage: 'GitHub Token 검증·저장 완료',
+    githubTarget: cfg.owner + '/' + cfg.repo + '@' + cfg.branch
+  };
 }
 
 
