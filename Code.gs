@@ -1475,3 +1475,9 @@ function weekStartV2_(endDate){
   d.setUTCDate(d.getUTCDate()-6);
   return Utilities.formatDate(d,'UTC','yyyy-MM-dd');
 }
+
+
+/* Old Admin compatibility: always use Sheet DB flow; GitHub publish is intentionally bypassed. */
+function saveHtmlFromAdmin(payload){
+  return saveHtmlToSheetFromAdmin(payload);
+}
