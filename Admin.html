@@ -35,8 +35,9 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#0f172a}
 <body>
 <header><div class="wrap">
   <h1>📤 F/B LAM 관리자 <span style="font-size:11px;font-weight:800;background:#dcfce7;color:#166534;border-radius:999px;padding:3px 8px;vertical-align:middle">v2.0 · Daily / Weekly</span></h1>
-  <div class="sub">데일리·위클리·기획 리포트의 완성 HTML 원본을 Google Sheet DB에 그대로 저장합니다. GitHub Token이나 별도 발행 설정은 필요하지 않습니다.</div>
+  <div class="sub">데일리·위클리·기획 리포트의 완성 HTML 원본을 Google Sheet DB에 그대로 저장합니다. GitHub 연결이나 Token 입력은 필요하지 않습니다.</div>
 </div></header>
+
 <main class="wrap">
   <section class="card">
     <h2>1. 관리자 인증</h2>
@@ -46,18 +47,19 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#0f172a}
     </div>
     <div id="adminStatus" class="hint">먼저 관리자 비밀번호를 입력하세요.</div>
   </section>
+
   <section class="card">
     <h2>2. HTML 업로드</h2>
     <div class="rules">
       <strong>파일명 규칙</strong><br>
       데일리: <code>freight_YYYYMMDD.html</code><br>
-      위클리 기본: <code>freight_W_YYYYMMDD.html</code> (주간 종료일, 예: 20260925)<br>
+      위클리 기본: <code>freight_W_YYYYMMDD.html</code> (주간 종료일)<br>
       유럽 위클리: <code>freight_W_EU_YYYYMMDD.html</code><br>
       미국 위클리: <code>freight_W_US_YYYYMMDD.html</code><br>
       기획: <code>freight_S_YYYYMMDD_제목.html</code><br>
-      예: <code>freight_S_20260909_운임벙커주간분석.html</code><br>
       <span class="warn">업로드한 HTML의 화면·차트·스크립트·인쇄 설정을 임의 가공하지 않고 원본 그대로 보존합니다.</span>
     </div>
+
     <label class="upload" id="dropZone">
       <input id="fileInput" type="file" accept=".html,text/html">
       <div>
@@ -66,54 +68,75 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#0f172a}
         <div class="hint">클릭하거나 여기에 파일을 놓으세요.</div>
       </div>
     </label>
+
     <div id="fileStatus" class="hint"></div>
     <div id="fileMeta" class="meta" style="display:none"></div>
+
     <div class="row" style="margin-top:12px">
       <button class="secondary" id="previewBtn" onclick="previewFile()" disabled>미리보기</button>
       <button class="success" id="saveBtn" onclick="saveFile()" disabled>Google Sheet 저장</button>
     </div>
   </section>
+
   <section class="card" id="previewCard" style="display:none">
     <h2>3. 미리보기</h2>
-    <iframe id="previewFrame" class="preview" sandbox="allow-scripts allow-same-origin allow-downloads allow-popups"></iframe>
+    <iframe id="previewFrame" class="preview" sandbox="allow-scripts allow-same-origin allow-downloads allow-popups allow-modals"></iframe>
   </section>
+
   <section class="card" id="resultCard" style="display:none">
     <h2>저장 완료</h2>
     <div id="resultBox" class="result"></div>
   </section>
 </main>
+
 <script>
 let selectedFile=null;
 let selectedHtml='';
 let selectedMeta=null;
 let adminVerified=false;
+
 const fileInput=document.getElementById('fileInput');
 const dropZone=document.getElementById('dropZone');
+
 fileInput.addEventListener('change',e=>{if(e.target.files&&e.target.files[0])loadFile(e.target.files[0]);});
 ['dragenter','dragover'].forEach(ev=>dropZone.addEventListener(ev,e=>{e.preventDefault();dropZone.classList.add('drag');}));
 ['dragleave','drop'].forEach(ev=>dropZone.addEventListener(ev,e=>{e.preventDefault();dropZone.classList.remove('drag');}));
 dropZone.addEventListener('drop',e=>{const f=e.dataTransfer.files&&e.dataTransfer.files[0];if(f)loadFile(f);});
+
 function password(){return document.getElementById('adminPassword').value;}
 function setAdminStatus(text,good){const el=document.getElementById('adminStatus');el.textContent=text;el.className='hint '+(good?'good':'bad');}
+
 function checkAdmin(){
   const pw=password();
   if(!pw){setAdminStatus('관리자 비밀번호를 입력하세요.',false);return;}
   setAdminStatus('확인 중...',true);
   google.script.run
-    .withSuccessHandler(r=>{adminVerified=true;setAdminStatus('✓ 관리자 인증 완료 · '+(r.message||'Google Sheet DB 연결'),true);refreshButtons();})
-    .withFailureHandler(err=>{adminVerified=false;setAdminStatus(err.message||String(err),false);refreshButtons();})
+    .withSuccessHandler(r=>{
+      adminVerified=true;
+      setAdminStatus('✓ 관리자 인증 완료 · '+(r.message||'Aromatics Freight & Bunker DB'),true);
+      refreshButtons();
+    })
+    .withFailureHandler(err=>{
+      adminVerified=false;
+      setAdminStatus(err.message||String(err),false);
+      refreshButtons();
+    })
     .getAdminConfig(pw);
 }
+
 function validYmd(ymd){
   if(!/^\d{8}$/.test(ymd))return false;
   const y=+ymd.slice(0,4),m=+ymd.slice(4,6),d=+ymd.slice(6,8);
   const dt=new Date(Date.UTC(y,m-1,d));
   return dt.getUTCFullYear()===y&&dt.getUTCMonth()===m-1&&dt.getUTCDate()===d;
 }
+
 function isoDate(ymd){return ymd.slice(0,4)+'-'+ymd.slice(4,6)+'-'+ymd.slice(6,8);}
+
 function classifyName(name){
-  let m=/^freight_(\\d{8})\\.html$/i.exec(name);
+  let m=/^freight_(\d{8})\.html$/i.exec(name);
   if(m&&validYmd(m[1]))return{reportType:'daily',date:isoDate(m[1]),title:'운임 · 벙커 데일리'};
+
   m=/^freight_W_(?:(EU|US)_)?(\d{8})\.html$/i.exec(name);
   if(m&&validYmd(m[2])){
     const region=String(m[1]||'').toUpperCase();
@@ -121,116 +144,155 @@ function classifyName(name){
     const title=region==='EU'?'유럽 운임 · 벙커 위클리':region==='US'?'미국 운임 · 벙커 위클리':'운임 · 벙커 위클리';
     return{reportType:'weekly',date:isoDate(m[2]),region,regionLabel,title};
   }
-  m=/^freight_S_(\\d{8})_([^\\\\/:*?\"<>|]+)\\.html$/i.exec(name);
+
+  m=/^freight_S_(\d{8})_([^\\/:*?"<>|]+)\.html$/i.exec(name);
   if(m&&validYmd(m[1])){
     const title=String(m[2]||'').replace(/_+/g,' ').replace(/\s+/g,' ').trim();
     if(title)return{reportType:'special',date:isoDate(m[1]),title};
   }
+
+  m=/^freight_bunker_dashboard_(\d{4}-\d{2}-\d{2})(?:_[A-Za-z0-9_-]+)?\.html$/i.exec(name);
+  if(m)return{reportType:'daily',date:m[1],title:'운임 · 벙커 데일리'};
+
   return null;
 }
+
 function showMeta(meta,format){
-  const typeLabel=meta.reportType==='weekly'?((meta.regionLabel||'기본')+' 위클리 시황'):meta.reportType==='special'?'기획 시황':'운임 · 벙커 데일리';
+  const typeLabel=meta.reportType==='weekly'?((meta.regionLabel||'기본')+' 위클리'):meta.reportType==='special'?'기획 리포트':'데일리';
   const badge='<span class="badge '+esc(meta.reportType)+'">'+esc(typeLabel)+'</span>';
+
   document.getElementById('fileMeta').innerHTML=
-    '<div class="k">유형</div><div class="v">'+badge+'</div>'+ 
-    '<div class="k">기준일</div><div class="v">'+esc(meta.date)+'</div>'+ 
+    '<div class="k">유형</div><div class="v">'+badge+'</div>'+
+    '<div class="k">기준일</div><div class="v">'+esc(meta.date)+'</div>'+
     (meta.reportType==='weekly'?'<div class="k">지역</div><div class="v">'+esc(meta.regionLabel||'기본')+'</div>':'')+
-    '<div class="k">제목</div><div class="v">'+esc(meta.title)+'</div>'+ 
-    '<div class="k">HTML 형식</div><div class="v">'+esc(format)+'</div>'+ 
+    '<div class="k">제목</div><div class="v">'+esc(meta.title)+'</div>'+
+    '<div class="k">HTML 형식</div><div class="v">'+esc(format)+'</div>'+
     '<div class="k">파일명 규칙</div><div class="v good">✓ 정상</div>';
+
   document.getElementById('fileMeta').style.display='grid';
 }
+
 function clearSelection(message){
   selectedFile=null;selectedHtml='';selectedMeta=null;
   document.getElementById('fileMeta').style.display='none';
   document.getElementById('fileStatus').innerHTML='<span class="bad">'+esc(message)+'</span>';
   refreshButtons();
 }
+
 function loadFile(file){
   selectedFile=null;selectedHtml='';selectedMeta=null;
   document.getElementById('previewCard').style.display='none';
   document.getElementById('resultCard').style.display='none';
   document.getElementById('fileMeta').style.display='none';
+
   const name=file.name||'';
   document.getElementById('fileNameText').textContent=name;
   const meta=classifyName(name);
+
   if(!meta){
-    clearSelection('파일명 오류 · 데일리: freight_YYYYMMDD.html / 위클리: freight_W_YYYYMMDD.html, freight_W_EU_YYYYMMDD.html, freight_W_US_YYYYMMDD.html / 기획: freight_S_YYYYMMDD_제목.html');
+    clearSelection('파일명 오류 · 데일리 freight_YYYYMMDD.html / 위클리 freight_W_YYYYMMDD.html / 기획 freight_S_YYYYMMDD_제목.html');
     return;
   }
+
   const reader=new FileReader();
   reader.onload=()=>{
     const html=String(reader.result||'');
     if(!html.trim()){clearSelection('HTML 파일 내용이 비어 있습니다.');return;}
-    let format='';
+
     if(!/(<!doctype\s+html|<html[\s>])/i.test(html)||!/<body[\s>]/i.test(html)){
       clearSelection('독립형 HTML에 <html>과 <body>가 있어야 합니다.');
       return;
     }
-    if(meta.reportType==='daily'){
-      const hasJson=/<script\b(?=[^>]*\bid\s*=\s*["']plattsai-(?:prices|price-data)["'])/i.test(html);
-      const hasData=/(?:var|let|const)\s+DATA\s*=/.test(html)||/window\.DATA\s*=/.test(html);
-      const hasPrices=/(?:var|let|const)\s+PRICES\s*=/.test(html)||/window\.PRICES\s*=/.test(html);
-      const hasT=/(?:var|let|const)\s+T\s*=/.test(html)||/window\.T\s*=/.test(html);
-      format=(hasJson?'데일리 HTML 원본 보존';
-    }else if(meta.reportType==='weekly'){
-      format=(meta.regionLabel||'기본')+' 위클리 HTML 원본 보존';
-    }else{
-      format='독립형 HTML 원본 저장';
-    }
+
+    const format=meta.reportType==='weekly'
+      ?(meta.regionLabel||'기본')+' 위클리 HTML 원본 보존'
+      :meta.reportType==='special'
+      ?'기획 HTML 원본 보존'
+      :'데일리 HTML 원본 보존';
+
     selectedFile=file;selectedHtml=html;selectedMeta=meta;
     showMeta(meta,format);
+
     const docs=(html.match(/<!doctype\s+html/gi)||[]).length;
-    document.getElementById('fileStatus').innerHTML='<span class="good">✓ 인식 완료 · Google Sheet DB 저장 준비 완료</span>'+
-      ((meta.reportType==='daily'||meta.reportType==='weekly') && docs>1 ? '<br><span class="warn">주의: HTML 문서 선언이 '+docs+'개입니다. 위젯 초기화 스크립트 보존을 위해 원본은 임의로 삭제하지 않습니다. 미리보기에서 확인하세요.</span>':'');
+    document.getElementById('fileStatus').innerHTML=
+      '<span class="good">✓ 인식 완료 · Google Sheet DB 저장 준비 완료</span>'+
+      (docs>1?'<br><span class="warn">주의: HTML 문서 선언이 '+docs+'개입니다. 원본은 그대로 보존합니다.</span>':'');
+
     refreshButtons();
   };
   reader.onerror=()=>clearSelection('파일을 읽지 못했습니다.');
   reader.readAsText(file,'UTF-8');
 }
+
 function refreshButtons(){
   const fileOk=!!selectedFile&&!!selectedHtml&&!!selectedMeta;
   document.getElementById('previewBtn').disabled=!fileOk;
   document.getElementById('saveBtn').disabled=!(fileOk&&adminVerified);
 }
+
 function previewFile(){
   if(!selectedHtml)return;
   document.getElementById('previewCard').style.display='';
   document.getElementById('previewFrame').srcdoc=selectedHtml;
   document.getElementById('previewCard').scrollIntoView({behavior:'smooth',block:'start'});
 }
+
 function saveFile(){
   if(!selectedFile||!selectedHtml||!selectedMeta)return;
   if(!adminVerified){alert('관리자 인증을 먼저 완료해 주세요.');return;}
+
   const btn=document.getElementById('saveBtn');
   btn.disabled=true;btn.textContent='Google Sheet 저장 중...';
+
   google.script.run
     .withSuccessHandler(r=>{
       btn.textContent='Google Sheet 저장';refreshButtons();
-      const type=r.reportType==='weekly'?((r.weeklyRegionLabel||'기본')+' 위클리 시황'):r.reportType==='special'?'기획 시황':'운임 · 벙커 데일리';
-      let detail='<strong>✓ Google Sheet 저장 완료</strong><br>'+ 
-        '유형: '+esc(type)+'<br>'+ 
-        '기준일: '+esc(r.date)+'<br>'+ 
-        '제목: '+esc(r.title)+'<br>'+ 
-        '처리: '+(r.overwritten?'기존 동일 리포트 갱신':'신규 저장')+'<br>';
-      detail+='원본 HTML: '+(r.originalHtmlSaved?'보존 완료':'저장 확인 필요')+' ('+esc(r.htmlChunks||0)+'개 청크)<br>';
+
+      const type=r.reportType==='weekly'
+        ?((r.weeklyRegionLabel||'기본')+' 위클리')
+        :r.reportType==='special'
+        ?'기획 리포트'
+        :'데일리';
+
+      let detail='<strong>✓ Google Sheet 저장 완료</strong><br>'+
+        '유형: '+esc(type)+'<br>'+
+        '기준일: '+esc(r.date)+'<br>'+
+        '제목: '+esc(r.title)+'<br>'+
+        '처리: '+(r.overwritten?'기존 동일 리포트 갱신':'신규 저장')+'<br>'+
+        '원본 HTML: '+(r.originalHtmlSaved?'보존 완료':'저장 확인 필요')+' ('+esc(r.htmlChunks||0)+'개 청크)<br>';
+
       if(r.reportType==='weekly'){
         detail+='대상 기간: '+esc(r.weekStart)+' ~ '+esc(r.date)+'<br>'+
           '지역: '+esc(r.weeklyRegionLabel||'기본')+'<br>';
       }
+
       detail+='Report ID: '+esc(r.reportId);
+
       if(r.warnings&&r.warnings.length){
         detail+='<br><span class="warn">'+esc(r.warnings.join(' / '))+'</span>';
       }
+
       detail+='<br><a href="https://jskimlam.github.io/aromatics-freight-bunker-monitor/" target="_top" style="display:inline-flex;margin-top:10px;padding:8px 12px;border-radius:8px;background:#0b2e63;color:#fff;text-decoration:none;font-weight:800">대시보드 열기 →</a>';
+
       document.getElementById('resultCard').style.display='';
       document.getElementById('resultBox').innerHTML=detail;
       document.getElementById('resultCard').scrollIntoView({behavior:'smooth',block:'start'});
     })
-    .withFailureHandler(err=>{btn.textContent='Google Sheet 저장';refreshButtons();alert(err.message||String(err));})
-    .saveHtmlToSheetFromAdmin({adminPassword:password(),fileName:selectedFile.name,htmlText:selectedHtml});
+    .withFailureHandler(err=>{
+      btn.textContent='Google Sheet 저장';
+      refreshButtons();
+      alert(err.message||String(err));
+    })
+    .saveHtmlToSheetFromAdmin({
+      adminPassword:password(),
+      fileName:selectedFile.name,
+      htmlText:selectedHtml
+    });
 }
-function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+function esc(v){
+  return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
 </script>
 </body>
 </html>
