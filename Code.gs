@@ -20,7 +20,7 @@
  */
 
 const APP = {
-  VERSION: '1.2.1',
+  VERSION: '2.0.0',
   TZ: 'Asia/Seoul',
   HTML_CHUNK_SIZE: 40000,
 
@@ -159,8 +159,7 @@ function doGet(e) {
         return jsonOut_(listReports_(toInt_(p.limit, 100)));
 
       case 'getReportHtml':
-        requireDate_(p.date);
-        return jsonOut_(getReportHtml_(p.date));
+        return jsonOut_(getReportHtmlPublicV2_(p));
 
       default:
         throw new Error('Unknown action: ' + action);
@@ -1129,4 +1128,350 @@ function jsonOut_(obj) {
   return ContentService
     .createTextOutput(JSON.stringify(obj))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+/* ===== PLATTSAI-STYLE SHEET DB V2 ===== */
+
+const FBV2 = {
+  INDEX: 'REPORT_INDEX',
+  HTML: 'REPORT_HTML',
+  INDEX_HEADERS: ['report_id','date','report_type','region','week_start','title','filename','html_chars','html_chunks','created_at','updated_at'],
+  HTML_HEADERS: ['report_id','chunk_index','html_chunk','batch_id','total_chunks']
+};
+
+function ensureV2Storage_(){
+  const ss=SpreadsheetApp.getActiveSpreadsheet();
+  ensureSheet_(ss,FBV2.INDEX,FBV2.INDEX_HEADERS);
+  ensureSheet_(ss,FBV2.HTML,FBV2.HTML_HEADERS);
+  return ss;
+}
+
+function getAdminConfig(adminPassword){
+  verifyAdminPassword_(adminPassword);
+  const ss=ensureV2Storage_();
+  return {
+    ok:true,
+    version:APP.VERSION,
+    message:'Aromatics Freight & Bunker DB',
+    spreadsheetId:ss.getId(),
+    spreadsheetName:ss.getName(),
+    supportsDailyHtml:true,
+    supportsWeekly:true,
+    supportsWeeklyRegions:true,
+    supportsSpecial:true
+  };
+}
+
+function saveHtmlToSheetFromAdmin(payload){
+  payload=payload||{};
+  verifyAdminPassword_(payload.adminPassword);
+
+  const fileName=String(payload.fileName||'').trim();
+  const htmlText=String(payload.htmlText||'');
+  if(!htmlText) throw new Error('HTML 파일 내용이 비어 있습니다.');
+
+  const info=classifyUploadFilenameV2_(fileName);
+  const validation=validateStandaloneV2_(htmlText);
+  ensureV2Storage_();
+
+  const reportId=buildReportIdV2_(info,fileName);
+  const title=extractTitleV2_(htmlText,info);
+  const overwritten=reportExistsV2_(reportId);
+  const chunks=splitHtml_(htmlText);
+  const batchId=Utilities.getUuid();
+
+  saveReportHtmlV2_(reportId,chunks,batchId);
+  upsertReportIndexV2_({
+    reportId:reportId,
+    date:info.date,
+    reportType:info.reportType,
+    region:info.region||'',
+    weekStart:info.reportType==='weekly'?weekStartV2_(info.date):'',
+    title:title,
+    filename:fileName,
+    htmlChars:htmlText.length,
+    htmlChunks:chunks.length
+  });
+
+  writeLog_(info.date,'HTML_SAVE','OK',reportId+' · '+fileName+' · '+htmlText.length+' chars');
+
+  return {
+    ok:true,
+    version:APP.VERSION,
+    reportId:reportId,
+    reportType:info.reportType,
+    weeklyRegion:info.region||'',
+    weeklyRegionLabel:weeklyRegionLabelV2_(info.region||''),
+    date:info.date,
+    weekStart:info.reportType==='weekly'?weekStartV2_(info.date):'',
+    title:title,
+    fileName:fileName,
+    overwritten:overwritten,
+    originalHtmlSaved:true,
+    htmlChars:htmlText.length,
+    htmlChunks:chunks.length,
+    multipleHtmlDocuments:validation.doctypeCount>1,
+    warnings:validation.warnings
+  };
+}
+
+function classifyUploadFilenameV2_(fileName){
+  const name=String(fileName||'').trim();
+  let m;
+
+  m=/^freight_(\d{4})(\d{2})(\d{2})\.html$/i.exec(name);
+  if(m){
+    const date=m[1]+'-'+m[2]+'-'+m[3];
+    requireDate_(date);
+    return {reportType:'daily',date:date,region:'',title:'운임 · 벙커 데일리'};
+  }
+
+  m=/^freight_W_(?:(EU|US)_)?(\d{4})(\d{2})(\d{2})\.html$/i.exec(name);
+  if(m){
+    const region=normalizeWeeklyRegionV2_(m[1]||'');
+    const date=m[2]+'-'+m[3]+'-'+m[4];
+    requireDate_(date);
+    return {
+      reportType:'weekly',
+      date:date,
+      region:region,
+      title:region==='EU'?'유럽 운임 · 벙커 위클리':region==='US'?'미국 운임 · 벙커 위클리':'운임 · 벙커 위클리'
+    };
+  }
+
+  m=/^freight_S_(\d{4})(\d{2})(\d{2})_([^\\/:*?"<>|]+)\.html$/i.exec(name);
+  if(m){
+    const date=m[1]+'-'+m[2]+'-'+m[3];
+    requireDate_(date);
+    const title=String(m[4]||'').replace(/_+/g,' ').replace(/\s+/g,' ').trim();
+    if(!title) throw new Error('기획 리포트 파일명에는 제목이 필요합니다.');
+    return {reportType:'special',date:date,region:'',title:title};
+  }
+
+  m=/^freight_bunker_dashboard_(\d{4}-\d{2}-\d{2})(?:_[A-Za-z0-9_-]+)?\.html$/i.exec(name);
+  if(m){
+    requireDate_(m[1]);
+    return {reportType:'daily',date:m[1],region:'',title:'운임 · 벙커 데일리'};
+  }
+
+  throw new Error(
+    '파일명 형식이 올바르지 않습니다.\n'+
+    '데일리: freight_YYYYMMDD.html\n'+
+    '위클리: freight_W_YYYYMMDD.html / freight_W_EU_YYYYMMDD.html / freight_W_US_YYYYMMDD.html\n'+
+    '기획: freight_S_YYYYMMDD_제목.html'
+  );
+}
+
+function validateStandaloneV2_(htmlText){
+  const s=String(htmlText||'').trim();
+  const warnings=[];
+  if(!s) throw new Error('HTML 파일 내용이 비어 있습니다.');
+  if(!/(<!doctype\s+html|<html[\s>])/i.test(s)) throw new Error('원본 보존형 리포트는 독립형 HTML 파일이어야 합니다.');
+  if(!/<body[\s>]/i.test(s)) throw new Error('원본 HTML에서 <body>를 찾지 못했습니다.');
+  const docs=s.match(/<!doctype\s+html/gi)||[];
+  if(docs.length>1) warnings.push('DOCTYPE이 '+docs.length+'개 감지됨');
+  return {ok:true,doctypeCount:docs.length,warnings:warnings};
+}
+
+function buildReportIdV2_(info,fileName){
+  const ymd=info.date.replace(/-/g,'');
+  if(info.reportType==='daily') return 'D-'+ymd;
+  if(info.reportType==='weekly') return 'W-'+(info.region||'BASE')+'-'+ymd;
+  return 'S-'+ymd+'-'+sha256_(String(fileName||'').toLowerCase()).slice(0,16);
+}
+
+function extractTitleV2_(htmlText,info){
+  const all=[];
+  const rx=/<title\b[^>]*>([\s\S]*?)<\/title\s*>/gi;
+  let m;
+  while((m=rx.exec(htmlText))!==null){
+    const t=stripHtml_(m[1]).trim();
+    if(t) all.push(t);
+  }
+  const t=all.length?all[all.length-1]:'';
+  return (t&&!/^untitled$/i.test(t)?t:(info.title||'F/B LAM Report')).slice(0,220);
+}
+
+function saveReportHtmlV2_(reportId,chunks,batchId){
+  const ss=ensureV2Storage_();
+  const sh=ss.getSheetByName(FBV2.HTML);
+  const values=sh.getDataRange().getValues();
+
+  for(let r=values.length-1;r>=1;r--){
+    if(String(values[r][0]||'')===reportId) sh.deleteRow(r+1);
+  }
+
+  const rows=chunks.map((chunk,i)=>[reportId,i,chunk,batchId,chunks.length]);
+  if(rows.length) sh.getRange(sh.getLastRow()+1,1,rows.length,5).setValues(rows);
+}
+
+function upsertReportIndexV2_(item){
+  const ss=ensureV2Storage_();
+  const sh=ss.getSheetByName(FBV2.INDEX);
+  const values=sh.getDataRange().getValues();
+  let row=-1;
+
+  for(let r=1;r<values.length;r++){
+    if(String(values[r][0]||'')===item.reportId){row=r+1;break;}
+  }
+
+  const now=now_();
+  const createdAt=row>0?String(sh.getRange(row,10).getDisplayValue()||now):now;
+  const record=[[
+    item.reportId,item.date,item.reportType,item.region,item.weekStart,item.title,
+    item.filename,item.htmlChars,item.htmlChunks,createdAt,now
+  ]];
+
+  if(row>0) sh.getRange(row,1,1,record[0].length).setValues(record);
+  else sh.getRange(sh.getLastRow()+1,1,1,record[0].length).setValues(record);
+}
+
+function reportExistsV2_(reportId){
+  const ss=ensureV2Storage_();
+  const sh=ss.getSheetByName(FBV2.INDEX);
+  if(!sh||sh.getLastRow()<2) return false;
+  return sh.getRange(2,1,sh.getLastRow()-1,1).getDisplayValues().some(r=>String(r[0]||'')===reportId);
+}
+
+function listReports_(limit){
+  const ss=ensureV2Storage_();
+  const merged={};
+  const sh=ss.getSheetByName(FBV2.INDEX);
+
+  if(sh&&sh.getLastRow()>=2){
+    const rows=sh.getRange(2,1,sh.getLastRow()-1,11).getDisplayValues();
+    rows.forEach(r=>{
+      const id=String(r[0]||'');
+      if(!id) return;
+      merged[id]={
+        reportId:id,date:r[1],reportType:r[2]||'daily',region:r[3]||'',
+        regionLabel:weeklyRegionLabelV2_(r[3]||''),weekStart:r[4]||'',
+        title:r[5]||'',filename:r[6]||'',htmlChars:Number(r[7]||0),
+        htmlChunks:Number(r[8]||0),createdAt:r[9]||'',updatedAt:r[10]||'',storage:'sheet-v2'
+      };
+    });
+  }
+
+  const old=ss.getSheetByName(APP.SHEETS.MASTER);
+  if(old&&old.getLastRow()>=2){
+    const width=Math.min(10,Math.max(1,old.getLastColumn()));
+    const rows=old.getRange(2,1,old.getLastRow()-1,width).getDisplayValues();
+    rows.forEach(r=>{
+      const date=String(r[0]||'').slice(0,10);
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(date)) return;
+      const newId='D-'+date.replace(/-/g,'');
+      const id='OLD-D-'+date.replace(/-/g,'');
+      if(merged[newId]||merged[id]) return;
+      merged[id]={
+        reportId:id,date:date,reportType:'daily',region:'',regionLabel:'',weekStart:'',
+        title:r[1]||'운임 · 벙커 데일리',filename:r[2]||('freight_'+date.replace(/-/g,'')+'.html'),
+        htmlChars:Number(r[6]||0),htmlChunks:Number(r[7]||0),createdAt:r[8]||'',updatedAt:r[9]||'',storage:'legacy',
+        githubPath:r[4]||'',githubUrl:r[3]||''
+      };
+    });
+  }
+
+  const order={daily:1,weekly:2,special:3};
+  const reports=Object.keys(merged).map(k=>merged[k]).sort((a,b)=>{
+    if(a.date!==b.date) return a.date<b.date?1:-1;
+    return (order[a.reportType]||9)-(order[b.reportType]||9);
+  }).slice(0,Math.max(1,limit||500));
+
+  return {ok:true,version:APP.VERSION,reports:reports};
+}
+
+function getReportHtmlPublicV2_(p){
+  const id=String((p&&p.id)||'').trim();
+  const date=String((p&&p.date)||'').trim();
+
+  if(id) return getReportHtmlByIdV2_(id,false);
+
+  if(date){
+    requireDate_(date);
+    const v2=getReportHtmlByIdV2_('D-'+date.replace(/-/g,''),true);
+    if(v2&&v2.found) return v2;
+    return getLegacyDailyHtmlV2_(date);
+  }
+
+  throw new Error('id 또는 date 파라미터가 필요합니다.');
+}
+
+function getReportHtmlByIdV2_(reportId,silent){
+  const ss=ensureV2Storage_();
+
+  if(/^OLD-D-\d{8}$/.test(reportId)){
+    const ymd=reportId.slice(6);
+    return getLegacyDailyHtmlV2_(ymd.slice(0,4)+'-'+ymd.slice(4,6)+'-'+ymd.slice(6,8));
+  }
+
+  const idx=ss.getSheetByName(FBV2.INDEX);
+  const html=ss.getSheetByName(FBV2.HTML);
+  let meta=null;
+
+  if(idx&&idx.getLastRow()>=2){
+    const rows=idx.getRange(2,1,idx.getLastRow()-1,11).getDisplayValues();
+    for(let i=0;i<rows.length;i++){
+      if(String(rows[i][0]||'')===reportId){meta=rows[i];break;}
+    }
+  }
+
+  if(!meta){
+    if(silent) return {ok:true,found:false,reportId:reportId};
+    throw new Error('저장된 리포트를 찾을 수 없습니다: '+reportId);
+  }
+
+  const chunks=[];
+  if(html&&html.getLastRow()>=2){
+    html.getRange(2,1,html.getLastRow()-1,5).getValues()
+      .filter(r=>String(r[0]||'')===reportId)
+      .sort((a,b)=>Number(a[1])-Number(b[1]))
+      .forEach(r=>chunks.push(String(r[2]||'')));
+  }
+
+  if(!chunks.length){
+    if(silent) return {ok:true,found:false,reportId:reportId};
+    throw new Error('HTML 원본을 찾을 수 없습니다: '+reportId);
+  }
+
+  return {
+    ok:true,found:true,reportId:reportId,date:meta[1],reportType:meta[2]||'daily',
+    region:meta[3]||'',regionLabel:weeklyRegionLabelV2_(meta[3]||''),weekStart:meta[4]||'',
+    title:meta[5]||'',fileName:meta[6]||'',htmlText:chunks.join(''),htmlChunks:chunks.length,storage:'sheet-v2'
+  };
+}
+
+function getLegacyDailyHtmlV2_(date){
+  const ss=SpreadsheetApp.getActiveSpreadsheet();
+  const sh=ss.getSheetByName(APP.SHEETS.HTML);
+
+  if(!sh||sh.getLastRow()<2) return {ok:true,found:false,date:date,reportType:'daily',storage:'legacy'};
+
+  const rows=sh.getRange(2,1,sh.getLastRow()-1,5).getValues()
+    .filter(r=>dateCell_(r[0])===date)
+    .sort((a,b)=>Number(a[1])-Number(b[1]));
+
+  if(!rows.length) return {ok:true,found:false,date:date,reportType:'daily',storage:'legacy'};
+
+  return {
+    ok:true,found:true,reportId:'OLD-D-'+date.replace(/-/g,''),date:date,reportType:'daily',
+    region:'',regionLabel:'',weekStart:'',title:'운임 · 벙커 데일리',
+    fileName:'freight_'+date.replace(/-/g,'')+'.html',htmlText:rows.map(r=>String(r[2]||'')).join(''),
+    htmlChunks:rows.length,storage:'legacy'
+  };
+}
+
+function normalizeWeeklyRegionV2_(v){
+  const s=String(v||'').toUpperCase();
+  return s==='EU'||s==='US'?s:'';
+}
+
+function weeklyRegionLabelV2_(v){
+  const s=normalizeWeeklyRegionV2_(v);
+  return s==='EU'?'유럽':s==='US'?'미국':'기본';
+}
+
+function weekStartV2_(endDate){
+  const d=new Date(endDate+'T00:00:00Z');
+  d.setUTCDate(d.getUTCDate()-6);
+  return Utilities.formatDate(d,'UTC','yyyy-MM-dd');
 }
