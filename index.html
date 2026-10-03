@@ -47,7 +47,7 @@ main{padding:26px 0 52px}.dashboard-grid{display:grid;grid-template-columns:minm
       <button data-type="special">기획</button>
     </div>
     <article class="latest"><div class="date" id="liveArticleDate">최신 리포트 확인 중</div><h3>아로마 케미칼 운임 · 벙커 대시보드</h3><div class="desc">핵심 지표, 기간별 등락, 벙커 코멘터리, 추세 분석, 개별 지표, 운임 변동 내역을 통합한 최신 리서치 화면.</div><a class="open" id="liveLatestOpen" href="latest.html">최신 리포트 바로 열기 →</a></article>
-    <div class="archive" id="liveArchive"><div class="report"><div class="report-date">–</div><div><div class="report-title">아카이브 불러오는 중</div><div class="report-file">GitHub 저장소 확인 중</div></div><div class="arrow">…</div></div></div>
+    <div class="archive" id="liveArchive"><div class="report"><div class="report-date">–</div><div><div class="report-title">아카이브 불러오는 중</div><div class="report-file">Google Sheet DB 확인 중</div></div><div class="arrow">…</div></div></div>
   </section>
   <aside class="panel wti-panel" id="wtiPanel">
   <div class="wti-head">
@@ -65,7 +65,7 @@ main{padding:26px 0 52px}.dashboard-grid{display:grid;grid-template-columns:minm
   </div>
   <div class="wti-chart-shell"><div class="wti-chart" id="wtiChart"><div class="wti-empty">WTI 데이터 불러오는 중</div></div></div>
   <div class="wti-foot"><span><b>Source</b> · NYMEX WTI Settlement</span><span class="count" id="wtiFootCount">최근 14일</span></div>
-</aside></aside>
+</aside>
   </div></main>
 <footer><div class="wrap">Aromatics Freight Monitor · S&amp;P Global Platts 기반 운임·벙커 리서치 플랫폼</div></footer>
 <script>
@@ -241,9 +241,30 @@ main{padding:26px 0 52px}.dashboard-grid{display:grid;grid-template-columns:minm
     el('wtiChart').innerHTML='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="WTI 최근 2주 가격 추이"><defs><linearGradient id="wtiArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#2e6ba8" stop-opacity=".24"/><stop offset="100%" stop-color="#2e6ba8" stop-opacity=".02"/></linearGradient></defs>'+ygrid+rangeLines+'<path class="area" d="'+area+'"/><polyline class="trend" points="'+coords+'"/>'+circles+latestLabel+xlabels+'</svg>';
   }
 
-  if(window.__FB_LATEST_HTML)renderFromHtml(window.__FB_LATEST_HTML);
+  function safeRender(html){
+    try{
+      renderFromHtml(html);
+    }catch(err){
+      console.warn('WTI render failed',err);
+      fail('WTI 데이터 확인 필요');
+    }
+  }
+
+  if(window.__FB_LATEST_HTML) safeRender(window.__FB_LATEST_HTML);
+
   window.addEventListener('fb-latest-ready',function(e){
-    if(e&&e.detail&&e.detail.html)renderFromHtml(e.detail.html);
+    if(e&&e.detail&&e.detail.html) safeRender(e.detail.html);
   });
+
+  // DB 이벤트를 놓치거나 이전 브라우저 캐시가 남은 경우를 위한 최종 fallback.
+  setTimeout(function(){
+    var latestEl=el('wtiLatest');
+    if(latestEl && latestEl.textContent.trim()==='–' && !window.__FB_LATEST_HTML){
+      fetch('latest.html?wtifallback='+Date.now(),{cache:'no-store'})
+        .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.text();})
+        .then(safeRender)
+        .catch(function(){fail('WTI 데이터 로드 실패');});
+    }
+  },1800);
 })();</script>
 </body></html>
