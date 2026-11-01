@@ -9,9 +9,15 @@
   "description": "Chemical Freight · Bunker · Market Intelligence",
   "icons": [
     {
-      "src": "assets/fb_lam_app_icon.jpg",
+      "src": "assets/fb-lam-route-192.png",
       "sizes": "192x192",
-      "type": "image/jpeg",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/fb-lam-route-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "any"
     }
   ]
