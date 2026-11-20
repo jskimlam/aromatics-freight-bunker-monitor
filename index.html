@@ -149,6 +149,7 @@ main{padding:26px 0 52px}.dashboard-grid{display:grid;grid-template-columns:minm
 
   function loadLatest(latest){
     if(!latest)return;
+    if(latest.githubPath){fetch(cacheUrl(latest.githubPath),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error('PORT report');return r.text();}).then(function(html){parseLatestHtml(html,latest);}).catch(function(){el('liveBriefSummary').textContent='PORT 보고서 불러오기 실패';});return;}
     var q=latest.reportId?'id='+encodeURIComponent(latest.reportId):'date='+encodeURIComponent(latest.date||'');
     fetchJson(GAS_URL+'?action=getReportHtml&'+q+'&_='+Date.now())
       .then(function(p){
@@ -172,7 +173,11 @@ main{padding:26px 0 52px}.dashboard-grid{display:grid;grid-template-columns:minm
     });
   });
 
-  fetchJson(GAS_URL+'?action=listReports&limit=500&_='+Date.now())
+  // PORT_ARCHIVE_V1: preserve DB archive; validated PORT entries supersede only approved date/type.
+  Promise.all([fetchJson(GAS_URL+'?action=listReports&limit=500&_='+Date.now()).catch(function(){return {ok:false,reports:[]};}),fetchJson('port-reports.json?v='+Date.now()).catch(function(){return {reports:[]};})]).then(function(parts){
+    var rows=(parts[0].reports||[]).slice();(parts[1].reports||[]).forEach(function(p){rows=rows.filter(function(r){return !(r.date===p.date&&kind(r)===kind(p));});rows.push(p);});
+    if(!parts[0].ok&&!rows.length)throw new Error('Report archive unavailable');return {ok:true,reports:rows};
+  })
     .then(function(data){
       if(!data.ok)throw new Error(data.error||'API error');
       REPORTS=(data.reports||[]).sort(function(a,b){return String(a.date||'')<String(b.date||'')?1:-1;});

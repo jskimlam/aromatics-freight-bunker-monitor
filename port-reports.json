@@ -1,0 +1,14 @@
+{
+  "reports": [
+    {
+      "date": "2026-11-16",
+      "reportType": "daily",
+      "filename": "freight_20261116.html",
+      "githubPath": "reports/port/freight_20261116.html",
+      "title": "아로마 케미칼 운임 · 벙커 데일리 2026-11-16",
+      "weekStart": "",
+      "sha256": "1d208873a0682a65a4f004ea39d5a346f4defa7083121fbe78e52f452f62af19",
+      "updatedAt": "2026-11-20T20:27:58+09:00"
+    }
+  ]
+}
